@@ -3,11 +3,24 @@
 const TELEGRAM_TOKEN = '8424656659:AAEbo9X2Kuw1QZDRPyu_Uy-SNg6T36vQoRg';
 const CHAT_ID = '7203463194';
 
+// ⚠️ ضع رابط الـ Web App الخاص بجوجل شيت هنا
+const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxiE3T0XhvQQIRKqlB5JbtFge5tOsohGbej1Cawd_9uWczL5awfU4jvcSmh4X2I1ay1Wg/exec'; 
+
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
 };
+
+// دالة لتحويل رمز الدولة (US) إلى علم (🇺🇸)
+function getCountryFlag(countryCode) {
+    if (!countryCode || countryCode === 'Unknown') return '🌍';
+    const codePoints = countryCode
+        .toUpperCase()
+        .split('')
+        .map(char => 127397 + char.charCodeAt());
+    return String.fromCodePoint(...codePoints);
+}
 
 export async function onRequestOptions() {
     return new Response(null, { status: 204, headers: corsHeaders });
@@ -18,33 +31,77 @@ export async function onRequestPost(context) {
 
     try {
         const body = await request.json();
+        
+        // استخراج البيانات الحصرية من Cloudflare Edge
         const ip = request.headers.get('CF-Connecting-IP') || 'Unknown';
         const country = request.cf?.country || 'Unknown';
         const city = request.cf?.city || 'Unknown';
+        const continent = request.cf?.continent || 'Unknown';
+        const isp = request.cf?.asOrganization || 'Unknown'; // السحر هنا: معرفة مزود الخدمة
 
+        const flag = getCountryFlag(country);
+        
+        // تنسيق الوقت ليكون مقروءاً
+        const timestamp = new Date().toISOString().replace('T', ' @ ').split('.')[0] + ' UTC';
+
+        // 1️⃣ رسالة التليجرام الإبداعية
         const telegramMessage = `
-🚀 <b>New VaultAI Visitor</b>
-━━━━━━━━━━━━━━━━━
-🌐 <b>Geo &amp; IP:</b>
+🚀 <b>𝗩𝗮𝘂𝗹𝘁𝗔𝗜 𝗡𝗲𝘄 𝗩𝗶𝘀𝗶𝘁𝗼𝗿</b>
+━━━━━━━━━━━━━━━━━━━━
+
+🌐 <b>𝗚𝗲𝗼 & 𝗡𝗲𝘁𝘄𝗼𝗿𝗸</b>
 • IP: <code>${ip}</code>
-• Country: ${country}
+• Country: ${country} ${flag}
 • City: ${city}
-━━━━━━━━━━━━━━━━━
-📱 <b>Device &amp; Browser:</b>
+• Continent: ${continent}
+• ISP/ASN: ${isp}
+
+🔗 <b>𝗧𝗿𝗮𝗳𝗳𝗶𝗰 𝗦𝗼𝘂𝗿𝗰𝗲</b>
+• Source: ${body.utm_source || 'N/A'}
+• Campaign: ${body.utm_campaign || 'N/A'}
+• Medium: ${body.utm_medium || 'N/A'}
+• Term: ${body.utm_term || 'N/A'}
+• Content: ${body.utm_content || 'N/A'}
+• Page: ${body.page || 'N/A'}
+• Referrer: ${body.referrer || 'N/A'}
+
+📱 <b>𝗗𝗲𝘃𝗶𝗰𝗲 & 𝗘𝗻𝘃𝗶𝗿𝗼𝗻𝗺𝗲𝗻𝘁</b>
 • Device: ${body.device || 'N/A'}
 • OS: ${body.os || 'N/A'}
 • Browser: ${body.browser || 'N/A'}
-━━━━━━━━━━━━━━━━━
-🔗 <b>Traffic Data:</b>
-• Page: ${body.page || 'N/A'}
-• Referrer: ${body.referrer || 'N/A'}
-• UTM Source: ${body.utm_source || 'N/A'}
-• UTM Campaign: ${body.utm_campaign || 'N/A'}
+• Screen: ${body.screenRes || 'N/A'}
+• Language: ${body.lang || 'N/A'}
+• Timezone: ${body.tz || 'N/A'}
+
+⏱ <b>𝗧𝗶𝗺𝗲𝘀𝘁𝗮𝗺𝗽</b>
+ ${timestamp}
         `.trim();
 
-        const tgApiUrl = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-        
-        const tgResponse = await fetch(tgApiUrl, {
+        // 2️⃣ بيانات جوجل شيت
+        const sheetsData = {
+            timestamp: timestamp,
+            ip: ip,
+            country: country,
+            city: city,
+            continent: continent,
+            isp: isp,
+            utm_source: body.utm_source || 'N/A',
+            utm_medium: body.utm_medium || 'N/A',
+            utm_campaign: body.utm_campaign || 'N/A',
+            utm_term: body.utm_term || 'N/A',
+            utm_content: body.utm_content || 'N/A',
+            referrer: body.referrer || 'N/A',
+            page: body.page || 'N/A',
+            device: body.device || 'N/A',
+            os: body.os || 'N/A',
+            browser: body.browser || 'N/A',
+            screenRes: body.screenRes || 'N/A',
+            lang: body.lang || 'N/A',
+            timezone: body.tz || 'N/A'
+        };
+
+        // إرسال البيانات إلى تليجرام وجوجل شيت في نفس الوقت (بدون تعطيل أحدهما للآخر)
+        const tgPromise = fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -54,19 +111,14 @@ export async function onRequestPost(context) {
             })
         });
 
-        const tgData = await tgResponse.json();
+        const sheetPromise = fetch(GOOGLE_SHEET_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(sheetsData)
+        });
 
-        if (!tgData.ok) {
-            // إذا فشل الإرسال لتليجرام، نرجع الخطأ للمتصفح لنراه في الـ Console
-            return new Response(JSON.stringify({ 
-                status: 'telegram_error', 
-                error_code: tgData.error_code,
-                description: tgData.description 
-            }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json', ...corsHeaders }
-            });
-        }
+        // تنفيذ الطلبتين معاً
+        await Promise.allSettled([tgPromise, sheetPromise]);
 
         return new Response(JSON.stringify({ status: 'success' }), {
             status: 200,
@@ -74,7 +126,7 @@ export async function onRequestPost(context) {
         });
 
     } catch (error) {
-        return new Response(JSON.stringify({ status: 'server_error', message: error.message }), {
+        return new Response(JSON.stringify({ status: 'error', message: error.message }), {
             status: 500,
             headers: { 'Content-Type': 'application/json', ...corsHeaders }
         });
