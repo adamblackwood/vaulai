@@ -321,3 +321,93 @@ img {
         display: flex; /* Shown when toggled */
     }
 }
+
+/* --- Dashboard Styles --- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 25px;
+    text-align: center;
+    transition: all var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent-color);
+}
+
+.stat-card h3 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-card .value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.stat-card .value.alert {
+    color: #ff4d4d; /* أحمر للتنبيهات */
+}
+
+.table-container {
+    overflow-x: auto;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.data-table th, .data-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.data-table th {
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.data-table tr:hover {
+    background-color: rgba(79, 70, 229, 0.05);
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+.bot-badge {
+    background-color: rgba(255, 77, 77, 0.15);
+    color: #ff4d4d;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.refresh-btn {
+    margin-bottom: 20px;
+}

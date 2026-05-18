@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | VaultAI</title>
+    
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container nav">
+            <a href="/" class="logo">Vault<span>AI</span></a>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="dashboard.html" class="active">Dashboard</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+            <div class="menu-toggle" id="menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <section class="section">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;" class="fade-in">
+                <h1>Traffic Dashboard</h1>
+                <button class="btn btn-primary refresh-btn" onclick="fetchData()">Refresh Data</button>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="dashboard-grid fade-in">
+                <div class="stat-card">
+                    <h3>Total Visitors</h3>
+                    <div class="value" id="total-visitors">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Mobile Traffic</h3>
+                    <div class="value" id="mobile-traffic">0%</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Top Country</h3>
+                    <div class="value" id="top-country" style="font-size: 1.8rem;">-</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Bot/Spam Alerts</h3>
+                    <div class="value alert" id="bot-alerts">0</div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="table-container fade-in">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>IP</th>
+                            <th>Country</th>
+                            <th>ISP / ASN</th>
+                            <th>Source</th>
+                            <th>Campaign</th>
+                            <th>Device</th>
+                            <th>OS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-secondary);">Loading data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 VaultAI Dashboard.</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+
+    <!-- Dashboard Specific Script -->
+    <script>
+        // ⚠️ ضع رابط الـ Google Apps Script (الخاص بـ doGet) هنا
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxiE3T0XhvQQIRKqlB5JbtFge5tOsohGbej1Cawd_9uWczL5awfU4jvcSmh4X2I1ay1Wg/exec';
+
+        // كلمات مفتاحية لاكتشاف البوتات في الـ ISP
+        const botKeywords = ['amazon', 'google cloud', 'digitalocean', 'ovh', 'hetzner', 'microsoft', 'azure', 'oracle', 'vultr', 'linode', 'hosting'];
+
+        let allData = [];
+
+        async function fetchData() {
+            try {
+                const response = await fetch(API_URL);
+                allData = await response.json();
+                processAndRender(allData);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('table-body').innerHTML = `<tr><td colspan="8" style="text-align:center; color:#ff4d4d;">Failed to load data. Check API URL.</td></tr>`;
+            }
+        }
+
+        function processAndRender(data) {
+            // 1. حساب الإحصائيات (Stats)
+            const totalVisitors = data.length;
+            let mobileCount = 0;
+            let countryCounts = {};
+            let botCount = 0;
+
+            data.forEach(row => {
+                // حساب الموبايل
+                if (row.Device === 'Mobile') mobileCount++;
+
+                // حساب الدول
+                if (row.Country && row.Country !== 'Unknown') {
+                    countryCounts[row.Country] = (countryCounts[row.Country] || 0) + 1;
+                }
+
+                // حساب البوتات
+                const isp = (row['ISP/ASN'] || '').toLowerCase();
+                if (botKeywords.some(keyword => isp.includes(keyword))) {
+                    botCount++;
+                }
+            });
+
+            const mobilePercentage = totalVisitors > 0 ? Math.round((mobileCount / totalVisitors) * 100) : 0;
+            const topCountry = Object.keys(countryCounts).sort((a, b) => countryCounts[b] - countryCounts[a])[0] || '-';
+
+            // عرض البطاقات
+            document.getElementById('total-visitors').textContent = totalVisitors;
+            document.getElementById('mobile-traffic').textContent = mobilePercentage + '%';
+            document.getElementById('top-country').textContent = topCountry;
+            document.getElementById('bot-alerts').textContent = botCount;
+
+            // 2. بناء الجدول (Table Rows)
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = ''; // تفريغ الجدول
+
+            // عكس البيانات ليظهر الأحدث أولاً
+            const reversedData = [...data].reverse();
+
+            reversedData.forEach(row => {
+                const isp = (row['ISP/ASN'] || '').toLowerCase();
+                const isBot = botKeywords.some(keyword => isp.includes(keyword));
+
+                // تنسيق الوقت ليكون أقصر
+                const shortTime = row.Timestamp ? row.Timestamp.split(' @ ')[0] : '-';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${shortTime}</td>
+                    <td style="font-family: monospace; font-size: 0.85rem;">${row.IP || '-'}</td>
+                    <td><b>${row.Country || '-'}</b></td>
+                    <td>${isBot ? `<span class="bot-badge">🤖 BOT: ${row['ISP/ASN']}</span>` : (row['ISP/ASN'] || '-')}</td>
+                    <td>${row['UTM Source'] || '-'}</td>
+                    <td>${row['UTM Campaign'] || '-'}</td>
+                    <td>${row.Device || '-'}</td>
+                    <td>${row.OS || '-'}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // تشغيل جلب البيانات عند تحميل الصفحة
+        fetchData();
+    </script>
+</body>
+</html>
