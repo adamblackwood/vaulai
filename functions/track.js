@@ -2,7 +2,7 @@
 
 const TELEGRAM_TOKEN = '8424656659:AAEbo9X2Kuw1QZDRPyu_Uy-SNg6T36vQoRg';
 const CHAT_ID = '7203463194';
-const GOOGLE_SHEET_URL = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE'; 
+const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwrlgE02CVBqESMTRTR6-1GbEC79jqiHSzEQ1MmQpMNUnjLSR3O5XTSd5rnwTbI03skiw/exec'; 
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
