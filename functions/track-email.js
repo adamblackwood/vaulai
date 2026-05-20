@@ -2,7 +2,7 @@
 
 const TELEGRAM_TOKEN = '8424656659:AAEbo9X2Kuw1QZDRPyu_Uy-SNg6T36vQoRg';
 const CHAT_ID = '7203463194';
-const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxkLjdbJl0Ip_DDQqhfD9NjEKAIu-ox5_pM5CnX1CMQkK2_iZtGoRrRN1125P54wjZUPA/exec'; // نفس رابط الشيت
+const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxnVaFc4YKZta4P5nDnM-eGAREM6PhUx-taNfoEeXspB9spwaAvTj_0FIL3Gc7EA4vZUQ/exec'; // نفس رابط الشيت
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',

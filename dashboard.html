@@ -168,7 +168,7 @@
                 </div>
             </div>
 
-            <!-- Filters & Table (Same as before) -->
+            <!-- Filters & Table -->
              <div class="controls-bar fade-in">
                 <div class="filter-group">
                     <label>Geo (Country)</label>
@@ -217,14 +217,14 @@
 
     <script src="assets/js/main.js"></script>
     <script>
-        // ⚠️ ضع رابط الـ Google Apps Script الجديد (V3) هنا
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxkLjdbJl0Ip_DDQqhfD9NjEKAIu-ox5_pM5CnX1CMQkK2_iZtGoRrRN1125P54wjZUPA/exec';
+        // ⚠️ ضع رابط الـ Google Apps Script الجديد (V4) هنا
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxnVaFc4YKZta4P5nDnM-eGAREM6PhUx-taNfoEeXspB9spwaAvTj_0FIL3Gc7EA4vZUQ/exec';
         
         const botKeywords = ['amazon', 'google cloud', 'digitalocean', 'ovh', 'hetzner', 'microsoft', 'azure', 'oracle', 'vultr', 'linode', 'hosting'];
         let allData = [];
 
         // ==========================================
-        // CONFIG LOGIC
+        // CONFIG LOGIC (Fixed GET Method)
         // ==========================================
         async function loadConfig() {
             try {
@@ -247,7 +247,6 @@
                     badge.className = 'status-badge status-off';
                 }
 
-                // Update badge on toggle change
                 toggle.addEventListener('change', function() {
                     if (this.checked) {
                         badge.textContent = 'ON';
@@ -263,30 +262,31 @@
 
         async function saveConfig() {
             const status = document.getElementById('redirect-toggle').checked ? 'ON' : 'OFF';
-            const smartlink = document.getElementById('config-smartlink').value;
-            const blocked = document.getElementById('config-blocked').value;
+            const smartlink = encodeURIComponent(document.getElementById('config-smartlink').value);
+            const blocked = encodeURIComponent(document.getElementById('config-blocked').value);
 
             try {
-                await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        type: 'updateConfig',
-                        status: status,
-                        smartlinkUrl: smartlink,
-                        blockedReferrers: blocked
-                    })
-                });
-                alert('✅ Settings saved successfully!');
-            } catch (error) { alert('❌ Failed to save settings.'); }
+                // إرسال الإعدادات كطلب GET لتجنب مشكلة الـ POST Redirect
+                const response = await fetch(`${API_URL}?action=updateConfig&status=${status}&smartlinkUrl=${smartlink}&blockedReferrers=${blocked}`);
+                const data = await response.json();
+                
+                if(data.status === 'success') {
+                    alert('✅ Settings saved successfully!');
+                } else {
+                    alert('❌ Failed to save settings.');
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                alert('❌ Failed to save settings. Check console.');
+            }
         }
 
         // ==========================================
-        // TRAFFIC LOGIC (Same as before)
+        // TRAFFIC LOGIC
         // ==========================================
         async function fetchData() {
             try {
-                const response = await fetch(API_URL); // default action is traffic data
+                const response = await fetch(API_URL);
                 allData = await response.json();
                 populateFilters();
                 applyFilters();
