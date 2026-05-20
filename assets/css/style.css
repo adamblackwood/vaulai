@@ -1,17 +1,18 @@
 /* =========================================
-   VaultAI - Master Stylesheet (Dark Mode)
+   GoalPulse - Light Mode (Beige & Green)
    ========================================= */
 
-/* --- CSS Variables (Theme) --- */
+/* --- CSS Variables (Light Football Theme) --- */
 :root {
-    --bg-primary: #0a0a0f;
-    --bg-secondary: #12121a;
-    --bg-card: #1a1a26;
-    --text-primary: #f5f5f7;
-    --text-secondary: #a1a1aa;
-    --accent-color: #4f46e5;
-    --accent-hover: #6366f1;
-    --border-color: #2a2a3a;
+    --bg-primary: #F5F2EB;      /* بيج فاتح ودافئ (الخلفية الرئيسية) */
+    --bg-secondary: #EDE9E0;    /* بيج أغمق قليلاً (للفواصل والخلفيات الثانوية) */
+    --bg-card: #FFFFFF;         /* أبيض ناصع (للكروت والجداول) */
+    --text-primary: #1F2937;    /* رمادي داكن جداً (أسود تقريباً للنصوص) */
+    --text-secondary: #6B7280;  /* رمادي متوسط (للنصوص الثانوية) */
+    --accent-color: #047857;    /* أخضر ملاعب داكن (Emerald) */
+    --accent-hover: #059669;    /* أخضر فاتح */
+    --highlight-color: #D97706; /* ذهبي داكن (للتوصيات والمراهنات) */
+    --border-color: #E5E7EB;    /* رمادي فاتح جداً (للحدود) */
     --font-main: 'Inter', system-ui, -apple-system, sans-serif;
     --radius: 8px;
     --transition: 0.3s ease;
@@ -65,7 +66,7 @@ img {
 .header {
     position: sticky;
     top: 0;
-    background-color: rgba(10, 10, 15, 0.95);
+    background-color: rgba(255, 255, 255, 0.95); /* أبيض شفاف للهيدر */
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-color);
     z-index: 1000;
@@ -88,7 +89,7 @@ img {
 }
 
 .logo span {
-    color: var(--accent-color);
+    color: var(--accent-color); /* لون أخضر لكلمة Pulse */
 }
 
 .nav-links {
@@ -100,13 +101,15 @@ img {
 .nav-links a {
     color: var(--text-secondary);
     font-weight: 500;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     position: relative;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .nav-links a:hover,
 .nav-links a.active {
-    color: var(--text-primary);
+    color: var(--accent-color);
 }
 
 .nav-links a.active::after {
@@ -129,7 +132,7 @@ img {
 .menu-toggle span {
     width: 25px;
     height: 2px;
-    background-color: var(--text-primary);
+    background-color: var(--text-primary); /* لون داكن للقائمة في الموبايل */
     transition: var(--transition);
 }
 
@@ -137,6 +140,7 @@ img {
 .hero {
     padding: 80px 0;
     text-align: center;
+    background: radial-gradient(circle at center, rgba(4, 120, 87, 0.05) 0%, var(--bg-primary) 70%);
 }
 
 .hero h1 {
@@ -144,9 +148,8 @@ img {
     font-weight: 800;
     line-height: 1.2;
     margin-bottom: 20px;
-    background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-color) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    color: var(--text-primary); /* لون داكن للعنوان */
 }
 
 .hero p {
@@ -166,6 +169,8 @@ img {
     transition: all var(--transition);
     cursor: pointer;
     border: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .btn-primary {
@@ -176,7 +181,18 @@ img {
 .btn-primary:hover {
     background-color: var(--accent-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+    box-shadow: 0 4px 15px rgba(4, 120, 87, 0.2);
+}
+
+.btn-gold {
+    background-color: var(--highlight-color);
+    color: #fff;
+}
+
+.btn-gold:hover {
+    background-color: #B45309;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(217, 119, 6, 0.2);
 }
 
 .btn-outline {
@@ -200,6 +216,8 @@ img {
     font-weight: 700;
     margin-bottom: 40px;
     text-align: center;
+    text-transform: uppercase;
+    color: var(--text-primary);
 }
 
 .grid {
@@ -209,17 +227,18 @@ img {
 }
 
 .card {
-    background-color: var(--bg-card);
+    background-color: var(--bg-card); /* أبيض */
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
     overflow: hidden;
     transition: all var(--transition);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02); /* ظل خفيف جداً */
 }
 
 .card:hover {
     transform: translateY(-5px);
     border-color: var(--accent-color);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06); /* ظل أوضح عند التمرير */
 }
 
 .card-img {
@@ -235,6 +254,7 @@ img {
 .card-content h3 {
     font-size: 1.25rem;
     margin-bottom: 10px;
+    color: var(--text-primary);
 }
 
 .card-content p {
@@ -243,10 +263,10 @@ img {
     margin-bottom: 20px;
 }
 
-/* --- CTA Block (Articles) --- */
+/* --- CTA Block (Articles - Betting) --- */
 .cta-block {
-    background: linear-gradient(135deg, var(--bg-card) 0%, var(--accent-color) 200%);
-    border: 1px solid var(--accent-color);
+    background: linear-gradient(135deg, var(--bg-card) 0%, rgba(217, 119, 6, 0.1) 200%);
+    border: 1px solid var(--highlight-color);
     border-radius: var(--radius);
     padding: 40px;
     text-align: center;
@@ -256,6 +276,7 @@ img {
 .cta-block h3 {
     font-size: 1.5rem;
     margin-bottom: 15px;
+    color: var(--highlight-color); /* ذهبي */
 }
 
 .cta-block p {
@@ -270,6 +291,7 @@ img {
     text-align: center;
     color: var(--text-secondary);
     font-size: 0.9rem;
+    background-color: var(--bg-secondary); /* بيج غامق قليلاً للفوتر */
 }
 
 /* --- Animations --- */
@@ -284,7 +306,7 @@ img {
     transform: translateY(0);
 }
 
-/* --- Responsive (Tablet & Desktop) --- */
+/* --- Responsive --- */
 @media (min-width: 768px) {
     .hero h1 { font-size: 3.5rem; }
     .grid { grid-template-columns: repeat(2, 1fr); }
@@ -294,7 +316,6 @@ img {
     .grid { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* Mobile Navigation */
 @media (max-width: 768px) {
     .menu-toggle { display: flex; }
     .nav-links {
@@ -302,23 +323,21 @@ img {
         top: 70px;
         left: 0;
         width: 100%;
-        background-color: var(--bg-secondary);
+        background-color: var(--bg-card); /* أبيض للقائمة في الموبايل */
         flex-direction: column;
         align-items: center;
         padding: 20px 0;
         gap: 20px;
         border-bottom: 1px solid var(--border-color);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         display: none;
     }
     .nav-links.active { display: flex; }
 }
 
-
 /* =========================================
-   Professional Dashboard Styles
+   Professional Dashboard Styles (Light Mode)
    ========================================= */
-
-/* --- Quality Stats Grid --- */
 .quality-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -333,11 +352,13 @@ img {
     padding: 20px;
     text-align: center;
     transition: all var(--transition);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 
 .quality-card:hover {
     transform: translateY(-3px);
     border-color: var(--accent-color);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.06);
 }
 
 .quality-card .val {
@@ -354,14 +375,13 @@ img {
     letter-spacing: 0.5px;
 }
 
-/* --- Filters Bar --- */
 .controls-bar {
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
     margin-bottom: 30px;
     padding: 20px;
-    background-color: var(--bg-secondary);
+    background-color: var(--bg-card);
     border-radius: var(--radius);
     border: 1px solid var(--border-color);
     align-items: flex-end;
@@ -384,7 +404,7 @@ img {
 }
 
 .filter-group select {
-    background-color: var(--bg-card);
+    background-color: var(--bg-primary); /* بيج */
     color: var(--text-primary);
     border: 1px solid var(--border-color);
     padding: 10px 12px;
@@ -393,7 +413,7 @@ img {
     cursor: pointer;
     appearance: none;
     -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23a1a1aa' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236B7280' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
 }
@@ -403,7 +423,6 @@ img {
     border-color: var(--accent-color);
 }
 
-/* --- Charts Section --- */
 .charts-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -416,6 +435,7 @@ img {
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
     padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 
 .chart-card h3 {
@@ -424,34 +444,11 @@ img {
     color: var(--text-secondary);
 }
 
-.bar-container {
-    margin-bottom: 12px;
-}
+.bar-container { margin-bottom: 12px; }
+.bar-info { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px; color: var(--text-primary); }
+.bar-bg { width: 100%; height: 8px; background-color: var(--bg-secondary); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; background-color: var(--accent-color); border-radius: 4px; transition: width 0.5s ease; }
 
-.bar-info {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.85rem;
-    margin-bottom: 5px;
-    color: var(--text-primary);
-}
-
-.bar-bg {
-    width: 100%;
-    height: 8px;
-    background-color: var(--bg-secondary);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.bar-fill {
-    height: 100%;
-    background-color: var(--accent-color);
-    border-radius: 4px;
-    transition: width 0.5s ease;
-}
-
-/* --- Data Table --- */
 .table-container {
     overflow-x: auto;
     background-color: var(--bg-card);
@@ -459,39 +456,14 @@ img {
     border-radius: var(--radius);
 }
 
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9rem;
-}
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.data-table th, .data-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+.data-table th { background-color: var(--bg-primary); color: var(--text-secondary); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.data-table tr:hover { background-color: rgba(4, 120, 87, 0.03); }
+.data-table tr:last-child td { border-bottom: none; }
 
-.data-table th, .data-table td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-    white-space: nowrap;
-}
-
-.data-table th {
-    background-color: var(--bg-secondary);
-    color: var(--text-secondary);
-    font-weight: 600;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.data-table tr:hover {
-    background-color: rgba(79, 70, 229, 0.05);
-}
-
-.data-table tr:last-child td {
-    border-bottom: none;
-}
-
-/* --- Badges --- */
 .email-badge {
-    background-color: rgba(79, 70, 229, 0.15);
+    background-color: rgba(4, 120, 87, 0.1);
     color: var(--accent-color);
     padding: 4px 8px;
     border-radius: 4px;

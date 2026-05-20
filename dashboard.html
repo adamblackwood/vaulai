@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Dashboard | VaultAI</title>
+    <title>GoalPulse Analytics | Dashboard</title>
+    
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -11,10 +12,10 @@
     <!-- Header -->
     <header class="header">
         <div class="container nav">
-            <a href="/" class="logo">Vault<span>AI</span></a>
+            <a href="/" class="logo">Goal<span>Pulse</span> ⚽</a>
             <ul class="nav-links" id="nav-links">
                 <li><a href="/">Home</a></li>
-                <li><a href="dashboard.html" class="active">Dashboard</a></li>
+                <li><a href="dashboard.html" class="active">Analytics</a></li>
             </ul>
             <div class="menu-toggle" id="menu-toggle">
                 <span></span><span></span><span></span>
@@ -25,69 +26,72 @@
     <!-- Dashboard Content -->
     <section class="section">
         <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;" class="fade-in">
-                <h1>Traffic Analytics</h1>
-                <button class="btn btn-outline" onclick="exportToCSV()">📥 Export Filtered CSV</button>
-            </div>
-            <div class="last-updated fade-in" id="last-updated">Last updated: Never</div>
+            
+            <h1 class="fade-in" style="margin-bottom: 30px;">⚽ Match Traffic Analytics</h1>
 
-            <!-- Summary Cards -->
-            <div class="dashboard-grid fade-in">
-                <div class="stat-card">
-                    <h3>Total Hits</h3>
-                    <div class="value" id="total-visitors">0</div>
+            <!-- Stats Cards -->
+            <div class="quality-grid fade-in">
+                <div class="quality-card">
+                    <div class="val" id="stat-total">0</div>
+                    <div class="lbl">Total Punters</div>
                 </div>
-                <div class="stat-card">
-                    <h3>Mobile %</h3>
-                    <div class="value" id="mobile-traffic">0%</div>
+                <div class="quality-card">
+                    <div class="val" id="stat-mobile">0%</div>
+                    <div class="lbl">Mobile Users</div>
                 </div>
-                <div class="stat-card">
-                    <h3>Traffic Quality</h3>
-                    <div id="quality-score" class="score-circle score-good">100%</div>
+                <div class="quality-card">
+                    <div class="val" id="stat-emails">0</div>
+                    <div class="lbl">Newsletter Opens</div>
                 </div>
-                <div class="stat-card">
-                    <h3>🤖 Bot Alerts</h3>
-                    <div class="value alert" id="bot-alerts">0</div>
+                <div class="quality-card">
+                    <div class="val" id="stat-quality" style="color: #047857;">100%</div>
+                    <div class="lbl">Audience Quality</div>
                 </div>
             </div>
 
             <!-- Charts Section -->
             <div class="charts-grid fade-in">
                 <div class="chart-card">
-                    <h3>🌍 Top 5 Countries</h3>
-                    <div id="country-charts"></div>
+                    <h3>🌍 Top 5 Geos (Countries)</h3>
+                    <div id="country-charts"><p style="color:var(--text-secondary)">Loading...</p></div>
                 </div>
                 <div class="chart-card">
-                    <h3>🔗 Top 5 Sources</h3>
-                    <div id="source-charts"></div>
+                    <h3>🏆 Top 5 Promos (Campaigns)</h3>
+                    <div id="campaign-charts"><p style="color:var(--text-secondary)">Loading...</p></div>
                 </div>
             </div>
 
-            <!-- Filters -->
+            <!-- Filters Bar -->
             <div class="controls-bar fade-in">
                 <div class="filter-group">
-                    <label>Country</label>
+                    <label>Geo (Country)</label>
                     <select id="filter-country" onchange="applyFilters()">
-                        <option value="all">All Countries</option>
+                        <option value="all">All Geos</option>
                     </select>
                 </div>
                 <div class="filter-group">
                     <label>Device</label>
                     <select id="filter-device" onchange="applyFilters()">
                         <option value="all">All Devices</option>
-                        <option value="Mobile">Mobile</option>
                         <option value="Desktop">Desktop</option>
-                        <option value="Email Client">Email Opened</option>
+                        <option value="Mobile">Mobile</option>
+                        <option value="Tablet">Tablet</option>
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label>Source</label>
-                    <select id="filter-source" onchange="applyFilters()">
-                        <option value="all">All Sources</option>
+                    <label>Promo (Campaign)</label>
+                    <select id="filter-campaign" onchange="applyFilters()">
+                        <option value="all">All Promos</option>
                     </select>
                 </div>
-                <button class="btn-danger" onclick="showBotsOnly()">🤖 Show Bots Only</button>
-                <button class="btn btn-outline" onclick="resetFilters()" style="align-self: flex-end;">Reset</button>
+                <div class="filter-group">
+                    <label>Traffic Type</label>
+                    <select id="filter-type" onchange="applyFilters()">
+                        <option value="all">All Traffic</option>
+                        <option value="email">📧 Email Opens</option>
+                        <option value="web">🌐 Web Visits</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Data Table -->
@@ -97,16 +101,16 @@
                         <tr>
                             <th>Time</th>
                             <th>IP</th>
-                            <th>Country</th>
-                            <th>ISP / ASN</th>
-                            <th>Source</th>
-                            <th>Campaign</th>
+                            <th>Geo</th>
+                            <th>ISP / Carrier</th>
+                            <th>Channel</th>
+                            <th>Promo</th>
                             <th>Device</th>
                             <th>OS</th>
                         </tr>
                     </thead>
                     <tbody id="table-body">
-                        <tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-secondary);">Loading data...</td></tr>
+                        <tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-secondary);">Waiting for data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -114,15 +118,15 @@
         </div>
     </section>
 
-    <footer class="footer"><div class="container"><p>&copy; 2024 VaultAI Dashboard.</p></div></footer>
+    <footer class="footer"><div class="container"><p>&copy; 2024 GoalPulse Analytics.</p></div></footer>
 
     <script src="assets/js/main.js"></script>
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwrlgE02CVBqESMTRTR6-1GbEC79jqiHSzEQ1MmQpMNUnjLSR3O5XTSd5rnwTbI03skiw/exec';
-        const botKeywords = ['amazon', 'google cloud', 'digitalocean', 'ovh', 'hetzner', 'microsoft', 'azure', 'oracle', 'vultr', 'linode', 'hosting'];
+        // ⚠️ ضع رابط الـ Google Apps Script هنا
+        const API_URL = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
         
+        const botKeywords = ['amazon', 'google cloud', 'digitalocean', 'ovh', 'hetzner', 'microsoft', 'azure', 'oracle', 'vultr', 'linode', 'hosting'];
         let allData = [];
-        let filteredData = [];
 
         async function fetchData() {
             try {
@@ -130,49 +134,44 @@
                 allData = await response.json();
                 populateFilters();
                 applyFilters();
-                document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error('Error:', error);
             }
         }
 
         function populateFilters() {
             const countries = [...new Set(allData.map(d => d.Country).filter(c => c && c !== 'Unknown'))].sort();
-            const sources = [...new Set(allData.map(d => d['UTM Source']).filter(s => s && s !== 'direct' && s !== 'N/A'))].sort();
+            const campaigns = [...new Set(allData.map(d => d['UTM Campaign']).filter(c => c && c !== 'none' && c !== 'N/A'))].sort();
 
             const countrySelect = document.getElementById('filter-country');
-            countries.forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.text = c; countrySelect.add(opt); });
+            const campaignSelect = document.getElementById('filter-campaign');
+            
+            countrySelect.innerHTML = '<option value="all">All Geos</option>';
+            campaignSelect.innerHTML = '<option value="all">All Promos</option>';
 
-            const sourceSelect = document.getElementById('filter-source');
-            sources.forEach(s => { let opt = document.createElement('option'); opt.value = s; opt.text = s; sourceSelect.add(opt); });
+            countries.forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.text = c; countrySelect.add(opt); });
+            campaigns.forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.text = c; campaignSelect.add(opt); });
         }
 
         function applyFilters() {
             const country = document.getElementById('filter-country').value;
             const device = document.getElementById('filter-device').value;
-            const source = document.getElementById('filter-source').value;
+            const campaign = document.getElementById('filter-campaign').value;
+            const type = document.getElementById('filter-type').value;
 
-            filteredData = allData.filter(row => {
-                const isBot = botKeywords.some(kw => (row['ISP/ASN'] || '').toLowerCase().includes(kw));
-                const matchCountry = country === 'all' || row.Country === country;
-                const matchDevice = device === 'all' || row.Device === device;
-                const matchSource = source === 'all' || row['UTM Source'] === source;
-                return matchCountry && matchDevice && matchSource;
+            const filteredData = allData.filter(row => {
+                let matchCountry = country === 'all' || row.Country === country;
+                let matchDevice = device === 'all' || row.Device === device;
+                let matchCampaign = campaign === 'all' || row['UTM Campaign'] === campaign;
+                
+                let matchType = true;
+                if (type === 'email') matchType = row.Device === 'Email Client';
+                if (type === 'web') matchType = row.Device !== 'Email Client';
+
+                return matchCountry && matchDevice && matchCampaign && matchType;
             });
 
             renderDashboard(filteredData);
-        }
-
-        function showBotsOnly() {
-            filteredData = allData.filter(row => botKeywords.some(kw => (row['ISP/ASN'] || '').toLowerCase().includes(kw)));
-            renderDashboard(filteredData);
-        }
-
-        function resetFilters() {
-            document.getElementById('filter-country').value = 'all';
-            document.getElementById('filter-device').value = 'all';
-            document.getElementById('filter-source').value = 'all';
-            applyFilters();
         }
 
         function renderDashboard(data) {
@@ -184,10 +183,12 @@
         function renderStats(data) {
             const total = data.length;
             let mobileCount = 0;
+            let emailCount = 0;
             let botCount = 0;
 
             data.forEach(row => {
                 if (row.Device === 'Mobile') mobileCount++;
+                if (row.Device === 'Email Client') emailCount++;
                 const isp = (row['ISP/ASN'] || '').toLowerCase();
                 if (botKeywords.some(kw => isp.includes(kw))) botCount++;
             });
@@ -195,20 +196,19 @@
             const mobilePercentage = total > 0 ? Math.round((mobileCount / total) * 100) : 0;
             const qualityScore = total > 0 ? 100 - Math.round((botCount / total) * 100) : 100;
 
-            document.getElementById('total-visitors').textContent = total;
-            document.getElementById('mobile-traffic').textContent = mobilePercentage + '%';
-            document.getElementById('bot-alerts').textContent = botCount;
-
-            const scoreEl = document.getElementById('quality-score');
-            scoreEl.textContent = qualityScore + '%';
-            scoreEl.className = 'score-circle';
-            if(qualityScore >= 80) scoreEl.classList.add('score-good');
-            else if(qualityScore >= 50) scoreEl.classList.add('score-warn');
-            else scoreEl.classList.add('score-bad');
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-mobile').textContent = mobilePercentage + '%';
+            document.getElementById('stat-emails').textContent = emailCount;
+            
+            const qEl = document.getElementById('stat-quality');
+            qEl.textContent = qualityScore + '%';
+            if(qualityScore >= 80) qEl.style.color = '#047857'; // Green
+            else if(qualityScore >= 50) qEl.style.color = '#D97706'; // Gold
+            else qEl.style.color = '#DC2626'; // Red
         }
 
         function renderCharts(data) {
-            // Countries Chart
+            // Top Geos
             let countryCounts = {};
             data.forEach(r => { if(r.Country && r.Country !== 'Unknown') countryCounts[r.Country] = (countryCounts[r.Country] || 0) + 1; });
             const topCountries = Object.entries(countryCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
@@ -221,18 +221,18 @@
             });
             document.getElementById('country-charts').innerHTML = countryHtml || '<p style="color:var(--text-secondary)">No data</p>';
 
-            // Sources Chart
-            let sourceCounts = {};
-            data.forEach(r => { let src = r['UTM Source'] || 'direct'; sourceCounts[src] = (sourceCounts[src] || 0) + 1; });
-            const topSources = Object.entries(sourceCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
-            const maxSource = topSources.length > 0 ? topSources[0][1] : 1;
+            // Top Promos
+            let campaignCounts = {};
+            data.forEach(r => { let src = r['UTM Campaign'] || 'none'; campaignCounts[src] = (campaignCounts[src] || 0) + 1; });
+            const topCampaigns = Object.entries(campaignCounts).sort((a,b) => b[1] - a[1]).slice(0, 5);
+            const maxCampaign = topCampaigns.length > 0 ? topCampaigns[0][1] : 1;
 
-            let sourceHtml = '';
-            topSources.forEach(([name, count]) => {
-                const width = (count / maxSource) * 100;
-                sourceHtml += `<div class="bar-container"><div class="bar-info"><span>${name}</span><span>${count}</span></div><div class="bar-bg"><div class="bar-fill" style="width: ${width}%"></div></div></div>`;
+            let campaignHtml = '';
+            topCampaigns.forEach(([name, count]) => {
+                const width = (count / maxCampaign) * 100;
+                campaignHtml += `<div class="bar-container"><div class="bar-info"><span>${name}</span><span>${count}</span></div><div class="bar-bg"><div class="bar-fill" style="width: ${width}%"></div></div></div>`;
             });
-            document.getElementById('source-charts').innerHTML = sourceHtml || '<p style="color:var(--text-secondary)">No data</p>';
+            document.getElementById('campaign-charts').innerHTML = campaignHtml || '<p style="color:var(--text-secondary)">No data</p>';
         }
 
         function renderTable(data) {
@@ -240,14 +240,13 @@
             tableBody.innerHTML = '';
             
             if(data.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px;">No matching records found</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-secondary)">No matching records found</td></tr>`;
                 return;
             }
 
             const reversedData = [...data].reverse();
             reversedData.forEach(row => {
-                const isp = (row['ISP/ASN'] || '').toLowerCase();
-                const isBot = botKeywords.some(keyword => isp.includes(keyword));
+                const isEmail = row.Device === 'Email Client';
                 const shortTime = row.Timestamp ? row.Timestamp.split(' @ ')[0] : '-';
 
                 const tr = document.createElement('tr');
@@ -255,36 +254,18 @@
                     <td>${shortTime}</td>
                     <td style="font-family: monospace; font-size: 0.85rem;">${row.IP || '-'}</td>
                     <td><b>${row.Country || '-'}</b></td>
-                    <td>${isBot ? `<span class="bot-badge">🤖 BOT: ${row['ISP/ASN']}</span>` : (row['ISP/ASN'] || '-')}</td>
+                    <td>${row['ISP/ASN'] || '-'}</td>
                     <td>${row['UTM Source'] || '-'}</td>
                     <td>${row['UTM Campaign'] || '-'}</td>
-                    <td>${row.Device === 'Email Client' ? '📧 Email' : row.Device || '-'}</td>
+                    <td>${isEmail ? '<span class="email-badge">📧 Email</span>' : row.Device || '-'}</td>
                     <td>${row.OS || '-'}</td>
                 `;
                 tableBody.appendChild(tr);
             });
         }
 
-        function exportToCSV() {
-            if(filteredData.length === 0) { alert("No data to export"); return; }
-            
-            const headers = ["Timestamp","IP","Country","City","ISP","Source","Campaign","Device","OS","Browser"];
-            const rows = filteredData.map(r => [
-                r.Timestamp, r.IP, r.Country, r.City, r['ISP/ASN'], r['UTM Source'], r['UTM Campaign'], r.Device, r.OS, r.Browser
-            ]);
-
-            let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rows.map(e => e.join(",")).join("\n");
-            const link = document.createElement("a");
-            link.setAttribute("href", encodeURI(csvContent));
-            link.setAttribute("download", "vaultai_traffic_export.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // Initial Fetch & Auto Refresh
         fetchData();
-        setInterval(fetchData, 30000); // Refresh every 30 seconds
+        setInterval(fetchData, 15000);
     </script>
 </body>
 </html>
