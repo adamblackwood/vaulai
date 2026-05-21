@@ -218,11 +218,12 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Time</th><th>IP</th><th>Geo</th><th>ISP</th><th>Channel</th><th>Promo</th><th>Device</th><th>Redirect</th>
+                            <!-- تم إضافة OS مرة أخرى -->
+                            <th>Time</th><th>IP</th><th>Geo</th><th>ISP</th><th>Channel</th><th>Promo</th><th>Referrer</th><th>Device</th><th>OS</th><th>Redirect</th>
                         </tr>
                     </thead>
                     <tbody id="table-body">
-                        <tr><td colspan="8" style="text-align: center; padding: 40px; color: var(--text-secondary);">Waiting for data...</td></tr>
+                        <tr><td colspan="10" style="text-align: center; padding: 40px; color: var(--text-secondary);">Waiting for data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -385,7 +386,7 @@
 
         function renderTable(data) {
             const tableBody = document.getElementById('table-body'); tableBody.innerHTML = '';
-            if(data.length === 0) { tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-secondary)">No records</td></tr>`; return; }
+            if(data.length === 0) { tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:20px; color:var(--text-secondary)">No records</td></tr>`; return; }
             const reversedData = [...data].reverse();
             reversedData.forEach(row => {
                 const isEmail = row.Device === 'Email Client'; 
@@ -403,6 +404,13 @@
                     rBadge = '<span style="color:#6B7280;font-size:0.75rem;">⚪ Off</span>';
                 }
 
+                // استخراج مصدر الزيارة (Referrer) واقتطاعه ليفي بالجدول
+                const rawRef = row.Referrer || 'Direct';
+                let refDisplay = rawRef;
+                if (rawRef !== 'Direct' && rawRef.length > 30) {
+                    refDisplay = rawRef.substring(0, 30) + '...';
+                }
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${shortTime}</td>
@@ -411,7 +419,9 @@
                     <td>${ispVal}</td>
                     <td>${row['UTM Source']||'-'}</td>
                     <td>${row['UTM Campaign']||'-'}</td>
+                    <td style="font-size:0.85rem;color:var(--text-secondary);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${rawRef}">${refDisplay}</td>
                     <td>${isEmail ? '<span class="email-badge">📧 Email</span>' : row.Device||'-'}</td>
+                    <td>${row.OS||'-'}</td>
                     <td>${rBadge}</td>
                 `;
                 tableBody.appendChild(tr);
