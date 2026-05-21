@@ -12,6 +12,42 @@
     <meta property="og:image" content="https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=1200&q=80">
 
     <link rel="stylesheet" href="../assets/css/style.css">
+    
+    <!-- 🚀 SMART REDIRECT LOGIC (Runs instantly & securely) 🚀 -->
+    <script>
+        // متغير عام لتخزين حالة التحويل ليقرأها كود التتبع لاحقاً
+        window.__redirectStatus = "Off"; 
+
+        fetch('/api/config')
+            .then(res => res.json())
+            .then(config => {
+                if (config.status === 'ON') {
+                    const referrer = document.referrer.toLowerCase();
+                    const blockedList = (config.blockedReferrers || '').toLowerCase().split(',').map(item => item.trim());
+                    
+                    let isBlocked = false;
+                    for (let i = 0; i < blockedList.length; i++) {
+                        if (blockedList[i] && referrer.includes(blockedList[i])) {
+                            isBlocked = true;
+                            break;
+                        }
+                    }
+
+                    if (!isBlocked) {
+                        // الزائر مسموح، سيتم تحويله
+                        window.__redirectStatus = "Redirected";
+                        setTimeout(() => {
+                            window.location.replace(config.smartlinkUrl);
+                        }, 1500); // تأخير 1.5 ثانية لضمان تسجيل الزيارة في التتبع
+                    } else {
+                        // الزائر قادم من موقع محظور
+                        window.__redirectStatus = "Blocked";
+                    }
+                }
+            })
+            .catch(err => console.error('Config fetch error:', err));
+    </script>
+
     <script src="../assets/js/tracking.js"></script>
 </head>
 <body>
@@ -27,9 +63,7 @@
                 <li><a href="../privacy.html">Privacy</a></li>
             </ul>
             <div class="menu-toggle" id="menu-toggle">
-                <span></span>
-                <span></span>
-                <span></span>
+                <span></span><span></span><span></span>
             </div>
         </div>
     </header>
@@ -45,7 +79,7 @@
                 <img src="https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=1000&q=80" alt="Stadium" style="width: 100%; border-radius: var(--radius); margin-bottom: 30px;">
             </div>
 
-            <!-- Banner Ad 468x60 Placeholder (Below Title) -->
+            <!-- Banner Ad 468x60 Placeholder -->
             <div class="ad-placeholder fade-in" data-ad-type="banner-468" style="text-align: center; margin-bottom: 30px; min-height: 60px;"></div>
 
             <div class="fade-in">
@@ -54,7 +88,7 @@
                 <h2 style="font-size: 1.8rem; margin: 30px 0 15px;">Team News & Form</h2>
                 <p style="margin-bottom: 20px;">Real Madrid will rely heavily on their midfield maestro, while Manchester City's attacking depth poses a significant threat. Expect a high-intensity game with chances at both ends.</p>
                 
-                <!-- Native Ad Placeholder (Mid-article) -->
+                <!-- Native Ad Placeholder -->
                 <div class="ad-placeholder" data-ad-type="native" style="margin: 30px 0;"></div>
 
                 <h2 style="font-size: 1.8rem; margin: 30px 0 15px;">Key Stats</h2>
@@ -64,7 +98,6 @@
                 <div class="cta-block fade-in">
                     <h3>🔥 Unlock Our Exclusive Prediction & Best Odds!</h3>
                     <p>We've analyzed the stats, team news, and market movements. Tap below to see our premium pick and claim a special deposit bonus for this match!</p>
-                    <!-- Smartlink Button -->
                     <a href="#" class="btn btn-gold smartlink-btn" style="font-size: 1.1rem; padding: 15px 30px;">🎯 See Prediction & Claim Bonus</a>
                 </div>
 
@@ -80,11 +113,8 @@
         </div>
     </footer>
 
-    <!-- Main JS -->
     <script src="../assets/js/main.js"></script>
-    <!-- Ad Injector JS -->
     <script src="../assets/js/ads.js"></script>
-
     <!-- Social Bar Placeholder -->
     <div class="ad-placeholder" data-ad-type="social-bar"></div>
 </body>

