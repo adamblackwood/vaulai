@@ -13,7 +13,7 @@
 
     <link rel="stylesheet" href="../assets/css/style.css">
     
-    <!-- 🚀 SMART REDIRECT LOGIC (Fixed Timing Issue) 🚀 -->
+    <!-- 🚀 SMART REDIRECT LOGIC (Pro Domain Blocking) 🚀 -->
     <script>
         window.__redirectStatus = "Off"; 
         window.__smartlinkUrl = "#";
@@ -22,17 +22,45 @@
             .then(res => res.json())
             .then(config => {
                 if (config.status === 'ON') {
-                    const referrer = document.referrer.toLowerCase();
-                    const blockedList = (config.blockedReferrers || '').toLowerCase().split(',').map(item => item.trim());
-                    
                     let isBlocked = false;
-                    for (let i = 0; i < blockedList.length; i++) {
-                        if (blockedList[i] && referrer.includes(blockedList[i])) {
-                            isBlocked = true;
-                            break;
+                    let referrerHostname = '';
+
+                    // استخراج اسم الدومين (Hostname) بدقة من الرابط المحيل
+                    try {
+                        if (document.referrer) {
+                            referrerHostname = new URL(document.referrer).hostname.toLowerCase();
+                        }
+                    } catch (e) {
+                        // الرابط المحيل غير صالح
+                    }
+
+                    if (referrerHostname) {
+                        // 1. فحص الحظر الواسع (Broad Match - الدومين والنطاقات الفرعية)
+                        // مثال: facebook.com سيحظر m.facebook.com و l.facebook.com
+                        const blockedBroad = (config.blockedReferrers || '').toLowerCase().split(',').map(item => item.trim()).filter(item => item);
+                        for (let i = 0; i < blockedBroad.length; i++) {
+                            const domain = blockedBroad[i];
+                            // يتطابق إذا كان الدومين يساويه تماماً أو ينتهي بـ .الدومين
+                            if (referrerHostname === domain || referrerHostname.endsWith('.' + domain)) {
+                                isBlocked = true;
+                                break;
+                            }
+                        }
+
+                        // 2. فحص الحظر الدقيق (Exact Match - الدومين بالضبط فقط)
+                        // مثال: m.facebook.com سيحظر هذا فقط ولن يحظر l.facebook.com
+                        if (!isBlocked) {
+                            const blockedExact = (config.blockedExactReferrers || '').toLowerCase().split(',').map(item => item.trim()).filter(item => item);
+                            for (let i = 0; i < blockedExact.length; i++) {
+                                if (referrerHostname === blockedExact[i]) {
+                                    isBlocked = true;
+                                    break;
+                                }
+                            }
                         }
                     }
 
+                    // تحديد الحالة
                     if (!isBlocked) {
                         window.__redirectStatus = "Redirected";
                         window.__smartlinkUrl = config.smartlinkUrl;
@@ -41,12 +69,12 @@
                     }
                 }
                 
-                // 🔥 الآن وبعد تحديد الحالة بدقة، نقوم بتحميل كود التتبع
+                // تحميل كود التتبع بعد تحديد الحالة
                 var trackScript = document.createElement('script');
                 trackScript.src = '../assets/js/tracking.js';
                 document.head.appendChild(trackScript);
 
-                // إذا تم التحويل، نعطي وقتاً كافياً (2.5 ثانية) لإرسال البيانات قبل التحويل
+                // التحويل بعد 2.5 ثانية
                 if (window.__redirectStatus === "Redirected") {
                     setTimeout(() => {
                         window.location.replace(window.__smartlinkUrl);
@@ -55,7 +83,6 @@
             })
             .catch(err => {
                 console.error('Config error:', err);
-                // في حالة فشل الاتصال بالسيرفر، نحمّل التتبع العادي على الأقل
                 var trackScript = document.createElement('script');
                 trackScript.src = '../assets/js/tracking.js';
                 document.head.appendChild(trackScript);

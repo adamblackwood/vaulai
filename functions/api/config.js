@@ -1,7 +1,7 @@
 // functions/api/config.js
 
 // ⚠️ ضع رابط الـ Google Apps Script هنا (لن يظهر هذا الرابط للمتصفح أبداً)
-const GOOGLE_SHEET_API = 'https://script.google.com/macros/s/AKfycby7xcuftof9LzOgVFlxQAJoiyKxzd2UywiMzmr6Ew8YgsQkouJrDaa9a2E0CXh4gcvD5Q/exec';
+const GOOGLE_SHEET_API = 'https://script.google.com/macros/s/AKfycbzNl9z7w0qqwMzAeUuv8CniCCggRzD9eTc-sM34hDP76NxNpYXZVNqYBct4W9APFisCjg/exec';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',

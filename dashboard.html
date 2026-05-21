@@ -6,87 +6,35 @@
     <title>GoalPulse Analytics | Dashboard</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
-        /* Custom Styles for Toggle Switch & Config Section */
-        .config-section {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            padding: 25px;
-            margin-bottom: 40px;
-        }
-        .config-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-        }
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
+        .config-section { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 25px; margin-bottom: 40px; }
+        .config-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        .toggle-switch { position: relative; display: inline-block; width: 60px; height: 34px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px; width: 26px;
-            left: 4px; bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--accent-color); }
         input:checked + .slider:before { transform: translateX(26px); }
-        
-        .config-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        @media (max-width: 768px) {
-            .config-grid { grid-template-columns: 1fr; }
-        }
-        .config-input {
-            width: 100%;
-            padding: 10px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            color: var(--text-primary);
-            font-family: var(--font-main);
-        }
-        .config-label {
-            display: block;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 5px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
+        .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 768px) { .config-grid { grid-template-columns: 1fr; } }
+        .config-input { width: 100%; padding: 10px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary); font-family: var(--font-main); }
+        .config-label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px; font-weight: 600; text-transform: uppercase; }
+        .config-hint { font-size: 0.7rem; color: var(--accent-color); margin-top: 4px; }
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
         .status-on { background-color: rgba(4, 120, 87, 0.1); color: #047857; }
         .status-off { background-color: rgba(220, 38, 38, 0.1); color: #dc2626; }
+        
+        /* Data Management Toolbar */
+        .data-toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; align-items: center; }
+        .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 4px; font-weight: 600; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); transition: 0.2s; }
+        .btn-sm:hover { border-color: var(--accent-color); color: var(--accent-color); }
+        .btn-danger-sm { background: rgba(220,38,38,0.1); color: #dc2626; border-color: rgba(220,38,38,0.3); }
+        .btn-danger-sm:hover { background: #dc2626; color: white; }
+        .btn-archive-sm { background: rgba(217,119,6,0.1); color: #D97706; border-color: rgba(217,119,6,0.3); }
+        .btn-archive-sm:hover { background: #D97706; color: white; }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
     <header class="header">
         <div class="container nav">
             <a href="/" class="logo">Goal<span>Pulse</span> ⚽</a>
@@ -94,140 +42,69 @@
                 <li><a href="/">Home</a></li>
                 <li><a href="dashboard.html" class="active">Analytics</a></li>
             </ul>
-            <div class="menu-toggle" id="menu-toggle">
-                <span></span><span></span><span></span>
-            </div>
+            <div class="menu-toggle" id="menu-toggle"><span></span><span></span><span></span></div>
         </div>
     </header>
 
     <section class="section">
         <div class="container">
-            
             <h1 class="fade-in" style="margin-bottom: 30px;">⚽ Match Traffic Analytics</h1>
 
-            <!-- 🔴 REDIRECT CONTROL SECTION 🔴 -->
+            <!-- REDIRECT CONTROL SECTION -->
             <div class="config-section fade-in">
                 <div class="config-header">
                     <div>
                         <h2 style="font-size: 1.2rem; margin-bottom: 5px;">⚡ Auto-Redirect Control</h2>
-                        <p style="font-size: 0.8rem; color: var(--text-secondary);">Automatically send web visitors to Smartlink. (Does not affect email opens)</p>
                     </div>
                     <div style="display: flex; align-items: center; gap: 15px;">
                         <span id="redirect-status-badge" class="status-badge status-off">OFF</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="redirect-toggle">
-                            <span class="slider"></span>
-                        </label>
+                        <label class="toggle-switch"><input type="checkbox" id="redirect-toggle"><span class="slider"></span></label>
                     </div>
                 </div>
-
                 <div class="config-grid">
-                    <div>
-                        <label class="config-label">Smartlink URL</label>
-                        <input type="text" id="config-smartlink" class="config-input" placeholder="https://www.effectivecpmnetwork.com/...">
-                    </div>
-                    <div>
-                        <label class="config-label">Blocked Referrers (Comma separated)</label>
-                        <input type="text" id="config-blocked" class="config-input" placeholder="taboola.com, facebook.com, outbrain.com">
-                    </div>
+                    <div><label class="config-label">Smartlink URL</label><input type="text" id="config-smartlink" class="config-input"></div>
+                    <div><label class="config-label">🛑 Blocked Broad Domains</label><input type="text" id="config-blocked" class="config-input"><div class="config-hint">e.g., facebook.com blocks all subdomains</div></div>
+                    <div><label class="config-label">🎯 Blocked Exact Domains</label><input type="text" id="config-blocked-exact" class="config-input"><div class="config-hint">e.g., m.facebook.com blocks this strictly</div></div>
                 </div>
-                <div style="margin-top: 20px; text-align: right;">
-                    <button class="btn btn-primary" onclick="saveConfig()" style="font-size: 0.9rem; padding: 10px 20px;">💾 Save Settings</button>
-                </div>
+                <div style="margin-top: 20px; text-align: right;"><button class="btn btn-primary" onclick="saveConfig()" style="font-size: 0.9rem; padding: 10px 20px;">💾 Save Settings</button></div>
             </div>
 
             <!-- Stats Cards -->
             <div class="quality-grid fade-in">
-                <div class="quality-card">
-                    <div class="val" id="stat-total">0</div>
-                    <div class="lbl">Total Punters</div>
-                </div>
-                <div class="quality-card">
-                    <div class="val" id="stat-redirected" style="color: #047857;">0</div>
-                    <div class="lbl">🔄 Redirected</div>
-                </div>
-                <div class="quality-card">
-                    <div class="val" id="stat-blocked" style="color: #dc2626;">0</div>
-                    <div class="lbl">🛑 Blocked</div>
-                </div>
-                <div class="quality-card">
-                    <div class="val" id="stat-mobile">0%</div>
-                    <div class="lbl">Mobile Users</div>
-                </div>
-                <div class="quality-card">
-                    <div class="val" id="stat-emails">0</div>
-                    <div class="lbl">📧 Newsletter</div>
-                </div>
-                <div class="quality-card">
-                    <div class="val" id="stat-quality" style="color: #047857;">100%</div>
-                    <div class="lbl">Audience Quality</div>
-                </div>
+                <div class="quality-card"><div class="val" id="stat-total">0</div><div class="lbl">Total Punters</div></div>
+                <div class="quality-card"><div class="val" id="stat-redirected" style="color: #047857;">0</div><div class="lbl">🔄 Redirected</div></div>
+                <div class="quality-card"><div class="val" id="stat-blocked" style="color: #dc2626;">0</div><div class="lbl">🛑 Blocked</div></div>
+                <div class="quality-card"><div class="val" id="stat-mobile">0%</div><div class="lbl">Mobile Users</div></div>
+                <div class="quality-card"><div class="val" id="stat-emails">0</div><div class="lbl">📧 Newsletter</div></div>
+                <div class="quality-card"><div class="val" id="stat-quality" style="color: #047857;">100%</div><div class="lbl">Audience Quality</div></div>
             </div>
 
-            <!-- Charts Section -->
+            <!-- Charts & Filters (Same) -->
             <div class="charts-grid fade-in">
-                <div class="chart-card">
-                    <h3>🌍 Top 5 Geos</h3>
-                    <div id="country-charts"><p style="color:var(--text-secondary)">Loading...</p></div>
-                </div>
-                <div class="chart-card">
-                    <h3>🏆 Top 5 Promos</h3>
-                    <div id="campaign-charts"><p style="color:var(--text-secondary)">Loading...</p></div>
-                </div>
+                <div class="chart-card"><h3>🌍 Top 5 Geos</h3><div id="country-charts"></div></div>
+                <div class="chart-card"><h3>🏆 Top 5 Promos</h3><div id="campaign-charts"></div></div>
+            </div>
+            <div class="controls-bar fade-in">
+                <div class="filter-group"><label>Geo</label><select id="filter-country" onchange="applyFilters()"><option value="all">All</option></select></div>
+                <div class="filter-group"><label>Device</label><select id="filter-device" onchange="applyFilters()"><option value="all">All</option><option value="Desktop">Desktop</option><option value="Mobile">Mobile</option></select></div>
+                <div class="filter-group"><label>Promo</label><select id="filter-campaign" onchange="applyFilters()"><option value="all">All</option></select></div>
+                <div class="filter-group"><label>Redirect</label><select id="filter-redirect" onchange="applyFilters()"><option value="all">All</option><option value="Redirected">🔄 Yes</option><option value="Blocked">🛑 Blocked</option><option value="Off">⚪ No</option></select></div>
             </div>
 
-            <!-- Filters & Table -->
-             <div class="controls-bar fade-in">
-                <div class="filter-group">
-                    <label>Geo (Country)</label>
-                    <select id="filter-country" onchange="applyFilters()"><option value="all">All Geos</option></select>
-                </div>
-                <div class="filter-group">
-                    <label>Device</label>
-                    <select id="filter-device" onchange="applyFilters()">
-                        <option value="all">All Devices</option>
-                        <option value="Desktop">Desktop</option>
-                        <option value="Mobile">Mobile</option>
-                        <option value="Tablet">Tablet</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label>Promo (Campaign)</label>
-                    <select id="filter-campaign" onchange="applyFilters()"><option value="all">All Promos</option></select>
-                </div>
-                <div class="filter-group">
-                    <label>Redirect Status</label>
-                    <select id="filter-redirect" onchange="applyFilters()">
-                        <option value="all">All Statuses</option>
-                        <option value="Redirected">🔄 Redirected</option>
-                        <option value="Blocked">🛑 Blocked</option>
-                        <option value="Off">⚪ Off</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label>Traffic Type</label>
-                    <select id="filter-type" onchange="applyFilters()">
-                        <option value="all">All Traffic</option>
-                        <option value="email">📧 Email Opens</option>
-                        <option value="web">🌐 Web Visits</option>
-                    </select>
-                </div>
+            <!-- Data Management Toolbar -->
+            <div class="data-toolbar fade-in">
+                <input type="checkbox" id="select-all" style="cursor:pointer;"> <label for="select-all" style="font-size:0.85rem;cursor:pointer;">Select All</label>
+                <button class="btn-sm btn-danger-sm" onclick="deleteSelected()">🗑️ Delete Selected</button>
+                <button class="btn-sm btn-danger-sm" onclick="clearAllData()">🧹 Clear All Data</button>
+                <button class="btn-sm btn-archive-sm" onclick="archiveData()">📦 Archive & Backup</button>
             </div>
 
             <div class="table-container fade-in">
                 <table class="data-table">
-                    <thead>
-                        <tr>
-                            <!-- تم إضافة OS مرة أخرى -->
-                            <th>Time</th><th>IP</th><th>Geo</th><th>ISP</th><th>Channel</th><th>Promo</th><th>Referrer</th><th>Device</th><th>OS</th><th>Redirect</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body">
-                        <tr><td colspan="10" style="text-align: center; padding: 40px; color: var(--text-secondary);">Waiting for data...</td></tr>
-                    </tbody>
+                    <thead><tr><th></th><th>Time</th><th>IP</th><th>Geo</th><th>ISP</th><th>Channel</th><th>Promo</th><th>Referrer</th><th>Device</th><th>OS</th><th>Redirect</th></tr></thead>
+                    <tbody id="table-body"><tr><td colspan="11" style="text-align:center; padding:40px; color:var(--text-secondary);">Waiting for data...</td></tr></tbody>
                 </table>
             </div>
-            
         </div>
     </section>
 
@@ -235,203 +112,83 @@
 
     <script src="assets/js/main.js"></script>
     <script>
-        // ⚠️ ضع رابط الـ Google Apps Script هنا
-        const API_URL = 'https://script.google.com/macros/s/AKfycby7xcuftof9LzOgVFlxQAJoiyKxzd2UywiMzmr6Ew8YgsQkouJrDaa9a2E0CXh4gcvD5Q/exec';
-        
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzNl9z7w0qqwMzAeUuv8CniCCggRzD9eTc-sM34hDP76NxNpYXZVNqYBct4W9APFisCjg/exec'; // V8 URL
         const botKeywords = ['amazon', 'google cloud', 'digitalocean', 'ovh', 'hetzner', 'microsoft', 'azure', 'oracle', 'vultr', 'linode', 'hosting'];
         let allData = [];
 
-        // ==========================================
-        // CONFIG LOGIC
-        // ==========================================
-        async function loadConfig() {
-            try {
-                const response = await fetch(`${API_URL}?action=getConfig`);
-                const config = await response.json();
-                
-                document.getElementById('config-smartlink').value = config.smartlinkUrl || '';
-                document.getElementById('config-blocked').value = config.blockedReferrers || '';
-                
-                const toggle = document.getElementById('redirect-toggle');
-                const badge = document.getElementById('redirect-status-badge');
-                
-                if (config.status === 'ON') {
-                    toggle.checked = true;
-                    badge.textContent = 'ON';
-                    badge.className = 'status-badge status-on';
-                } else {
-                    toggle.checked = false;
-                    badge.textContent = 'OFF';
-                    badge.className = 'status-badge status-off';
-                }
+        // Config Logic
+        async function loadConfig() { try { const r = await fetch(`${API_URL}?action=getConfig`); const c = await r.json(); document.getElementById('config-smartlink').value = c.smartlinkUrl || ''; document.getElementById('config-blocked').value = c.blockedReferrers || ''; document.getElementById('config-blocked-exact').value = c.blockedExactReferrers || ''; const t = document.getElementById('redirect-toggle'); const b = document.getElementById('redirect-status-badge'); if(c.status==='ON'){t.checked=true;b.textContent='ON';b.className='status-badge status-on';}else{t.checked=false;b.textContent='OFF';b.className='status-badge status-off';} t.onchange=function(){if(this.checked){b.textContent='ON';b.className='status-badge status-on';}else{b.textContent='OFF';b.className='status-badge status-off';}}; } catch(e){} }
+        async function saveConfig() { const s = document.getElementById('redirect-toggle').checked?'ON':'OFF'; const sl = encodeURIComponent(document.getElementById('config-smartlink').value); const bl = encodeURIComponent(document.getElementById('config-blocked').value); const be = encodeURIComponent(document.getElementById('config-blocked-exact').value); try { const r = await fetch(`${API_URL}?action=updateConfig&status=${s}&smartlinkUrl=${sl}&blockedReferrers=${bl}&blockedExactReferrers=${be}`); const d = await r.json(); if(d.status==='success') alert('✅ Saved!'); else alert('❌ Failed'); } catch(e){ alert('❌ Failed'); } }
 
-                toggle.addEventListener('change', function() {
-                    if (this.checked) {
-                        badge.textContent = 'ON';
-                        badge.className = 'status-badge status-on';
-                    } else {
-                        badge.textContent = 'OFF';
-                        badge.className = 'status-badge status-off';
-                    }
-                });
-
-            } catch (error) { console.error('Config load error:', error); }
-        }
-
-        async function saveConfig() {
-            const status = document.getElementById('redirect-toggle').checked ? 'ON' : 'OFF';
-            const smartlink = encodeURIComponent(document.getElementById('config-smartlink').value);
-            const blocked = encodeURIComponent(document.getElementById('config-blocked').value);
-
-            try {
-                const response = await fetch(`${API_URL}?action=updateConfig&status=${status}&smartlinkUrl=${smartlink}&blockedReferrers=${blocked}`);
-                const data = await response.json();
-                
-                if(data.status === 'success') {
-                    alert('✅ Settings saved successfully!');
-                } else {
-                    alert('❌ Failed to save settings.');
-                }
-            } catch (error) {
-                console.error('Save error:', error);
-                alert('❌ Failed to save settings.');
-            }
-        }
-
-        // ==========================================
-        // TRAFFIC LOGIC
-        // ==========================================
-        async function fetchData() {
-            try {
-                const response = await fetch(API_URL);
-                allData = await response.json();
-                populateFilters();
-                applyFilters();
-            } catch (error) { console.error('Error:', error); }
-        }
-
-        function populateFilters() {
-            const countries = [...new Set(allData.map(d => d.Country).filter(c => c && c !== 'Unknown'))].sort();
-            const campaigns = [...new Set(allData.map(d => d['UTM Campaign']).filter(c => c && c !== 'none' && c !== 'N/A'))].sort();
-            const countrySelect = document.getElementById('filter-country');
-            const campaignSelect = document.getElementById('filter-campaign');
-            countrySelect.innerHTML = '<option value="all">All Geos</option>';
-            campaignSelect.innerHTML = '<option value="all">All Promos</option>';
-            countries.forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.text = c; countrySelect.add(opt); });
-            campaigns.forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.text = c; campaignSelect.add(opt); });
-        }
-
-        function applyFilters() {
-            const country = document.getElementById('filter-country').value;
-            const device = document.getElementById('filter-device').value;
-            const campaign = document.getElementById('filter-campaign').value;
-            const redirect = document.getElementById('filter-redirect').value;
-            const type = document.getElementById('filter-type').value;
-            
-            const filteredData = allData.filter(row => {
-                let matchCountry = country === 'all' || row.Country === country;
-                let matchDevice = device === 'all' || row.Device === device;
-                let matchCampaign = campaign === 'all' || row['UTM Campaign'] === campaign;
-                let matchRedirect = redirect === 'all' || (row['Redirect Status'] || 'Off') === redirect;
-                let matchType = true;
-                if (type === 'email') matchType = row.Device === 'Email Client';
-                if (type === 'web') matchType = row.Device !== 'Email Client';
-                return matchCountry && matchDevice && matchCampaign && matchRedirect && matchType;
-            });
-            renderDashboard(filteredData);
-        }
-
+        // Traffic Logic
+        async function fetchData() { try { const r = await fetch(API_URL); allData = await r.json(); populateFilters(); applyFilters(); } catch(e){} }
+        function populateFilters() { const c=[...new Set(allData.map(d=>d.Country).filter(c=>c&&c!=='Unknown'))].sort(); const cp=[...new Set(allData.map(d=>d['UTM Campaign']).filter(c=>c&&c!=='none'&&c!=='N/A'))].sort(); const cs=document.getElementById('filter-country'); const cps=document.getElementById('filter-campaign'); cs.innerHTML='<option value="all">All</option>'; cps.innerHTML='<option value="all">All</option>'; c.forEach(x=>{let o=document.createElement('option');o.value=x;o.text=x;cs.add(o);}); cp.forEach(x=>{let o=document.createElement('option');o.value=x;o.text=x;cps.add(o);}); }
+        function applyFilters() { const c=document.getElementById('filter-country').value; const d=document.getElementById('filter-device').value; const cp=document.getElementById('filter-campaign').value; const rd=document.getElementById('filter-redirect').value; const fd=allData.filter(r=>{let mc=c==='all'||r.Country===c;let md=d==='all'||r.Device===d;let mcp=cp==='all'||r['UTM Campaign']===cp;let mrd=rd==='all'||(r['Redirect Status']||'Off')===rd;return mc&&md&&mcp&&mrd;}); renderDashboard(fd); }
         function renderDashboard(data) { renderStats(data); renderCharts(data); renderTable(data); }
-
-        function renderStats(data) {
-            const total = data.length; 
-            let mobileCount = 0, emailCount = 0, botCount = 0, redirectedCount = 0, blockedCount = 0;
-            
-            data.forEach(row => {
-                if (row.Device === 'Mobile') mobileCount++;
-                if (row.Device === 'Email Client') emailCount++;
-                const isp = (row['ISP'] || row['ISP/ASN'] || '').toLowerCase();
-                if (botKeywords.some(kw => isp.includes(kw))) botCount++;
-                
-                const rStatus = row['Redirect Status'] || 'Off';
-                if (rStatus === 'Redirected') redirectedCount++;
-                if (rStatus === 'Blocked') blockedCount++;
-            });
-            
-            const mobilePercentage = total > 0 ? Math.round((mobileCount / total) * 100) : 0;
-            const qualityScore = total > 0 ? 100 - Math.round((botCount / total) * 100) : 100;
-            
-            document.getElementById('stat-total').textContent = total;
-            document.getElementById('stat-mobile').textContent = mobilePercentage + '%';
-            document.getElementById('stat-emails').textContent = emailCount;
-            document.getElementById('stat-redirected').textContent = redirectedCount;
-            document.getElementById('stat-blocked').textContent = blockedCount;
-            
-            const qEl = document.getElementById('stat-quality');
-            qEl.textContent = qualityScore + '%';
-            if(qualityScore >= 80) qEl.style.color = '#047857'; else if(qualityScore >= 50) qEl.style.color = '#D97706'; else qEl.style.color = '#DC2626';
-        }
-
-        function renderCharts(data) {
-            let countryCounts = {}; data.forEach(r => { if(r.Country && r.Country !== 'Unknown') countryCounts[r.Country] = (countryCounts[r.Country] || 0) + 1; });
-            const topCountries = Object.entries(countryCounts).sort((a,b) => b[1] - a[1]).slice(0, 5); const maxCountry = topCountries.length > 0 ? topCountries[0][1] : 1;
-            let countryHtml = ''; topCountries.forEach(([name, count]) => { const width = (count / maxCountry) * 100; countryHtml += `<div class="bar-container"><div class="bar-info"><span>${name}</span><span>${count}</span></div><div class="bar-bg"><div class="bar-fill" style="width: ${width}%"></div></div></div>`; });
-            document.getElementById('country-charts').innerHTML = countryHtml || '<p style="color:var(--text-secondary)">No data</p>';
-
-            let campaignCounts = {}; data.forEach(r => { let src = r['UTM Campaign'] || 'none'; campaignCounts[src] = (campaignCounts[src] || 0) + 1; });
-            const topCampaigns = Object.entries(campaignCounts).sort((a,b) => b[1] - a[1]).slice(0, 5); const maxCampaign = topCampaigns.length > 0 ? topCampaigns[0][1] : 1;
-            let campaignHtml = ''; topCampaigns.forEach(([name, count]) => { const width = (count / maxCampaign) * 100; campaignHtml += `<div class="bar-container"><div class="bar-info"><span>${name}</span><span>${count}</span></div><div class="bar-bg"><div class="bar-fill" style="width: ${width}%"></div></div></div>`; });
-            document.getElementById('campaign-charts').innerHTML = campaignHtml || '<p style="color:var(--text-secondary)">No data</p>';
-        }
+        
+        function renderStats(data) { const t=data.length; let m=0,e=0,b=0,re=0,bl=0; data.forEach(r=>{if(r.Device==='Mobile')m++;if(r.Device==='Email Client')e++;const i=(r['ISP']||r['ISP/ASN']||'').toLowerCase();if(botKeywords.some(k=>i.includes(k)))b++;const s=r['Redirect Status']||'Off';if(s==='Redirected')re++;if(s==='Blocked')bl++;}); document.getElementById('stat-total').textContent=t; document.getElementById('stat-mobile').textContent=t>0?Math.round((m/t)*100)+'%':'0%'; document.getElementById('stat-emails').textContent=e; document.getElementById('stat-redirected').textContent=re; document.getElementById('stat-blocked').textContent=bl; const q=document.getElementById('stat-quality'); const qs=t>0?100-Math.round((b/t)*100):100; q.textContent=qs+'%'; q.style.color=qs>=80?'#047857':qs>=50?'#D97706':'#DC2626'; }
+        
+        function renderCharts(data) { let cc={};data.forEach(r=>{if(r.Country&&r.Country!=='Unknown')cc[r.Country]=(cc[r.Country]||0)+1;});const tc=Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,5);const mc=tc.length>0?tc[0][1]:1;let ch='';tc.forEach(([n,c])=>{const w=(c/mc)*100;ch+=`<div class="bar-container"><div class="bar-info"><span>${n}</span><span>${c}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${w}%"></div></div></div>`;});document.getElementById('country-charts').innerHTML=ch||'<p style="color:var(--text-secondary)">No data</p>'; let pc={};data.forEach(r=>{let s=r['UTM Campaign']||'none';pc[s]=(pc[s]||0)+1;});const tp=Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,5);const mp=tp.length>0?tp[0][1]:1;let ph='';tp.forEach(([n,c])=>{const w=(c/mp)*100;ph+=`<div class="bar-container"><div class="bar-info"><span>${n}</span><span>${c}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${w}%"></div></div></div>`;});document.getElementById('campaign-charts').innerHTML=ph||'<p style="color:var(--text-secondary)">No data</p>'; }
 
         function renderTable(data) {
-            const tableBody = document.getElementById('table-body'); tableBody.innerHTML = '';
-            if(data.length === 0) { tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:20px; color:var(--text-secondary)">No records</td></tr>`; return; }
-            const reversedData = [...data].reverse();
-            reversedData.forEach(row => {
-                const isEmail = row.Device === 'Email Client'; 
+            const tb = document.getElementById('table-body'); tb.innerHTML = '';
+            if(data.length===0){tb.innerHTML=`<tr><td colspan="11" style="text-align:center;color:var(--text-secondary)">No records</td></tr>`;return;}
+            const rev=[...data].reverse();
+            rev.forEach(row => {
+                const vid = row.Visit_ID || ''; // الـ ID الفريد
                 const shortTime = row.Timestamp ? row.Timestamp.split(' @ ')[0] : '-';
                 const ispVal = row.ISP || row['ISP/ASN'] || '-';
-                
-                // تنسيق حالة التحويل بألوان مميزة
-                const rStatus = row['Redirect Status'] || 'Off';
-                let rBadge = '';
-                if (rStatus === 'Redirected') {
-                    rBadge = '<span style="background:rgba(4,120,87,0.1);color:#047857;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:600;">🔄 Redirected</span>';
-                } else if (rStatus === 'Blocked') {
-                    rBadge = '<span style="background:rgba(220,38,38,0.1);color:#dc2626;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:600;">🛑 Blocked</span>';
-                } else {
-                    rBadge = '<span style="color:#6B7280;font-size:0.75rem;">⚪ Off</span>';
-                }
-
-                // استخراج مصدر الزيارة (Referrer) واقتطاعه ليفي بالجدول
-                const rawRef = row.Referrer || 'Direct';
-                let refDisplay = rawRef;
-                if (rawRef !== 'Direct' && rawRef.length > 30) {
-                    refDisplay = rawRef.substring(0, 30) + '...';
-                }
+                const rStatus = row['Redirect Status'] || 'Off'; let rBadge = '';
+                if (rStatus === 'Redirected') rBadge = '<span style="background:rgba(4,120,87,0.1);color:#047857;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:600;">🔄 Yes</span>';
+                else if (rStatus === 'Blocked') rBadge = '<span style="background:rgba(220,38,38,0.1);color:#dc2626;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:600;">🛑 No</span>';
+                else rBadge = '<span style="color:#6B7280;font-size:0.75rem;">⚪ Off</span>';
+                const rawRef = row.Referrer || 'Direct'; let refDisplay = rawRef; if (rawRef !== 'Direct' && rawRef.length > 25) refDisplay = rawRef.substring(0, 25) + '...';
 
                 const tr = document.createElement('tr');
+                tr.setAttribute('data-id', vid); // تخزين الـ ID في الصف
                 tr.innerHTML = `
-                    <td>${shortTime}</td>
-                    <td style="font-family:monospace;font-size:0.85rem;">${row.IP||'-'}</td>
-                    <td><b>${row.Country||'-'}</b></td>
-                    <td>${ispVal}</td>
-                    <td>${row['UTM Source']||'-'}</td>
-                    <td>${row['UTM Campaign']||'-'}</td>
-                    <td style="font-size:0.85rem;color:var(--text-secondary);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${rawRef}">${refDisplay}</td>
-                    <td>${isEmail ? '<span class="email-badge">📧 Email</span>' : row.Device||'-'}</td>
-                    <td>${row.OS||'-'}</td>
-                    <td>${rBadge}</td>
+                    <td><input type="checkbox" class="row-checkbox" data-id="${vid}"></td>
+                    <td>${shortTime}</td><td style="font-family:monospace;font-size:0.85rem;">${row.IP||'-'}</td><td><b>${row.Country||'-'}</b></td>
+                    <td>${ispVal}</td><td>${row['UTM Source']||'-'}</td><td>${row['UTM Campaign']||'-'}</td>
+                    <td style="font-size:0.85rem;color:var(--text-secondary);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${rawRef}">${refDisplay}</td>
+                    <td>${row.Device||'-'}</td><td>${row.OS||'-'}</td><td>${rBadge}</td>
                 `;
-                tableBody.appendChild(tr);
+                tb.appendChild(tr);
             });
+        }
+
+        // Select All Logic
+        document.getElementById('select-all').onchange = function() {
+            document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = this.checked);
+        };
+
+        // Data Management Functions
+        async function deleteSelected() {
+            const checked = document.querySelectorAll('.row-checkbox:checked');
+            if (checked.length === 0) return alert('Please select rows to delete.');
+            if (!confirm(`Are you sure you want to delete ${checked.length} visits?`)) return;
+            
+            let ids = [];
+            checked.forEach(cb => ids.push(cb.getAttribute('data-id')));
+            
+            try {
+                await fetch(`${API_URL}?action=deleteRows&ids=${ids.join(',')}`);
+                fetchData(); // Refresh data
+            } catch(e) { alert('Error deleting data.'); }
+        }
+
+        async function clearAllData() {
+            if (!confirm('⚠️ WARNING: This will delete ALL traffic data. Are you sure?')) return;
+            try { await fetch(`${API_URL}?action=clearData`); fetchData(); } catch(e) { alert('Error clearing data.'); }
+        }
+
+        async function archiveData() {
+            if (!confirm('📦 This will move all current data to the Archive sheet and clear the main dashboard. Continue?')) return;
+            try { await fetch(`${API_URL}?action=archiveData`); fetchData(); } catch(e) { alert('Error archiving data.'); }
         }
 
         // Initial Load
-        loadConfig();
-        fetchData();
-        setInterval(fetchData, 15000);
+        loadConfig(); fetchData(); setInterval(fetchData, 15000);
     </script>
 </body>
 </html>
