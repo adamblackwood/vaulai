@@ -143,12 +143,20 @@
                     <div class="lbl">Total Punters</div>
                 </div>
                 <div class="quality-card">
+                    <div class="val" id="stat-redirected" style="color: #047857;">0</div>
+                    <div class="lbl">🔄 Redirected</div>
+                </div>
+                <div class="quality-card">
+                    <div class="val" id="stat-blocked" style="color: #dc2626;">0</div>
+                    <div class="lbl">🛑 Blocked</div>
+                </div>
+                <div class="quality-card">
                     <div class="val" id="stat-mobile">0%</div>
                     <div class="lbl">Mobile Users</div>
                 </div>
                 <div class="quality-card">
                     <div class="val" id="stat-emails">0</div>
-                    <div class="lbl">Newsletter Opens</div>
+                    <div class="lbl">📧 Newsletter</div>
                 </div>
                 <div class="quality-card">
                     <div class="val" id="stat-quality" style="color: #047857;">100%</div>
@@ -188,6 +196,15 @@
                     <select id="filter-campaign" onchange="applyFilters()"><option value="all">All Promos</option></select>
                 </div>
                 <div class="filter-group">
+                    <label>Redirect Status</label>
+                    <select id="filter-redirect" onchange="applyFilters()">
+                        <option value="all">All Statuses</option>
+                        <option value="Redirected">🔄 Redirected</option>
+                        <option value="Blocked">🛑 Blocked</option>
+                        <option value="Off">⚪ Off</option>
+                    </select>
+                </div>
+                <div class="filter-group">
                     <label>Traffic Type</label>
                     <select id="filter-type" onchange="applyFilters()">
                         <option value="all">All Traffic</option>
@@ -201,7 +218,7 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Time</th><th>IP</th><th>Geo</th><th>ISP</th><th>Channel</th><th>Promo</th><th>Device</th><th>OS</th>
+                            <th>Time</th><th>IP</th><th>Geo</th><th>ISP</th><th>Channel</th><th>Promo</th><th>Device</th><th>Redirect</th>
                         </tr>
                     </thead>
                     <tbody id="table-body">
@@ -217,14 +234,14 @@
 
     <script src="assets/js/main.js"></script>
     <script>
-        // ⚠️ ضع رابط الـ Google Apps Script الجديد (V4) هنا
+        // ⚠️ ضع رابط الـ Google Apps Script هنا
         const API_URL = 'https://script.google.com/macros/s/AKfycby7xcuftof9LzOgVFlxQAJoiyKxzd2UywiMzmr6Ew8YgsQkouJrDaa9a2E0CXh4gcvD5Q/exec';
         
         const botKeywords = ['amazon', 'google cloud', 'digitalocean', 'ovh', 'hetzner', 'microsoft', 'azure', 'oracle', 'vultr', 'linode', 'hosting'];
         let allData = [];
 
         // ==========================================
-        // CONFIG LOGIC (Fixed GET Method)
+        // CONFIG LOGIC
         // ==========================================
         async function loadConfig() {
             try {
@@ -266,7 +283,6 @@
             const blocked = encodeURIComponent(document.getElementById('config-blocked').value);
 
             try {
-                // إرسال الإعدادات كطلب GET لتجنب مشكلة الـ POST Redirect
                 const response = await fetch(`${API_URL}?action=updateConfig&status=${status}&smartlinkUrl=${smartlink}&blockedReferrers=${blocked}`);
                 const data = await response.json();
                 
@@ -277,7 +293,7 @@
                 }
             } catch (error) {
                 console.error('Save error:', error);
-                alert('❌ Failed to save settings. Check console.');
+                alert('❌ Failed to save settings.');
             }
         }
 
@@ -308,15 +324,18 @@
             const country = document.getElementById('filter-country').value;
             const device = document.getElementById('filter-device').value;
             const campaign = document.getElementById('filter-campaign').value;
+            const redirect = document.getElementById('filter-redirect').value;
             const type = document.getElementById('filter-type').value;
+            
             const filteredData = allData.filter(row => {
                 let matchCountry = country === 'all' || row.Country === country;
                 let matchDevice = device === 'all' || row.Device === device;
                 let matchCampaign = campaign === 'all' || row['UTM Campaign'] === campaign;
+                let matchRedirect = redirect === 'all' || (row['Redirect Status'] || 'Off') === redirect;
                 let matchType = true;
                 if (type === 'email') matchType = row.Device === 'Email Client';
                 if (type === 'web') matchType = row.Device !== 'Email Client';
-                return matchCountry && matchDevice && matchCampaign && matchType;
+                return matchCountry && matchDevice && matchCampaign && matchRedirect && matchType;
             });
             renderDashboard(filteredData);
         }
@@ -324,18 +343,29 @@
         function renderDashboard(data) { renderStats(data); renderCharts(data); renderTable(data); }
 
         function renderStats(data) {
-            const total = data.length; let mobileCount = 0, emailCount = 0, botCount = 0;
+            const total = data.length; 
+            let mobileCount = 0, emailCount = 0, botCount = 0, redirectedCount = 0, blockedCount = 0;
+            
             data.forEach(row => {
                 if (row.Device === 'Mobile') mobileCount++;
                 if (row.Device === 'Email Client') emailCount++;
                 const isp = (row['ISP'] || row['ISP/ASN'] || '').toLowerCase();
                 if (botKeywords.some(kw => isp.includes(kw))) botCount++;
+                
+                const rStatus = row['Redirect Status'] || 'Off';
+                if (rStatus === 'Redirected') redirectedCount++;
+                if (rStatus === 'Blocked') blockedCount++;
             });
+            
             const mobilePercentage = total > 0 ? Math.round((mobileCount / total) * 100) : 0;
             const qualityScore = total > 0 ? 100 - Math.round((botCount / total) * 100) : 100;
+            
             document.getElementById('stat-total').textContent = total;
             document.getElementById('stat-mobile').textContent = mobilePercentage + '%';
             document.getElementById('stat-emails').textContent = emailCount;
+            document.getElementById('stat-redirected').textContent = redirectedCount;
+            document.getElementById('stat-blocked').textContent = blockedCount;
+            
             const qEl = document.getElementById('stat-quality');
             qEl.textContent = qualityScore + '%';
             if(qualityScore >= 80) qEl.style.color = '#047857'; else if(qualityScore >= 50) qEl.style.color = '#D97706'; else qEl.style.color = '#DC2626';
@@ -358,10 +388,32 @@
             if(data.length === 0) { tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-secondary)">No records</td></tr>`; return; }
             const reversedData = [...data].reverse();
             reversedData.forEach(row => {
-                const isEmail = row.Device === 'Email Client'; const shortTime = row.Timestamp ? row.Timestamp.split(' @ ')[0] : '-';
+                const isEmail = row.Device === 'Email Client'; 
+                const shortTime = row.Timestamp ? row.Timestamp.split(' @ ')[0] : '-';
                 const ispVal = row.ISP || row['ISP/ASN'] || '-';
+                
+                // تنسيق حالة التحويل بألوان مميزة
+                const rStatus = row['Redirect Status'] || 'Off';
+                let rBadge = '';
+                if (rStatus === 'Redirected') {
+                    rBadge = '<span style="background:rgba(4,120,87,0.1);color:#047857;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:600;">🔄 Redirected</span>';
+                } else if (rStatus === 'Blocked') {
+                    rBadge = '<span style="background:rgba(220,38,38,0.1);color:#dc2626;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:600;">🛑 Blocked</span>';
+                } else {
+                    rBadge = '<span style="color:#6B7280;font-size:0.75rem;">⚪ Off</span>';
+                }
+
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${shortTime}</td><td style="font-family:monospace;font-size:0.85rem;">${row.IP||'-'}</td><td><b>${row.Country||'-'}</b></td><td>${ispVal}</td><td>${row['UTM Source']||'-'}</td><td>${row['UTM Campaign']||'-'}</td><td>${isEmail ? '<span class="email-badge">📧 Email</span>' : row.Device||'-'}</td><td>${row.OS||'-'}</td>`;
+                tr.innerHTML = `
+                    <td>${shortTime}</td>
+                    <td style="font-family:monospace;font-size:0.85rem;">${row.IP||'-'}</td>
+                    <td><b>${row.Country||'-'}</b></td>
+                    <td>${ispVal}</td>
+                    <td>${row['UTM Source']||'-'}</td>
+                    <td>${row['UTM Campaign']||'-'}</td>
+                    <td>${isEmail ? '<span class="email-badge">📧 Email</span>' : row.Device||'-'}</td>
+                    <td>${rBadge}</td>
+                `;
                 tableBody.appendChild(tr);
             });
         }
