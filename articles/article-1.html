@@ -13,10 +13,10 @@
 
     <link rel="stylesheet" href="../assets/css/style.css">
     
-    <!-- 🚀 SMART REDIRECT LOGIC (Runs instantly & securely) 🚀 -->
+    <!-- 🚀 SMART REDIRECT LOGIC (Fixed Timing Issue) 🚀 -->
     <script>
-        // متغير عام لتخزين حالة التحويل ليقرأها كود التتبع لاحقاً
         window.__redirectStatus = "Off"; 
+        window.__smartlinkUrl = "#";
 
         fetch('/api/config')
             .then(res => res.json())
@@ -34,21 +34,33 @@
                     }
 
                     if (!isBlocked) {
-                        // الزائر مسموح، سيتم تحويله
                         window.__redirectStatus = "Redirected";
-                        setTimeout(() => {
-                            window.location.replace(config.smartlinkUrl);
-                        }, 1500); // تأخير 1.5 ثانية لضمان تسجيل الزيارة في التتبع
+                        window.__smartlinkUrl = config.smartlinkUrl;
                     } else {
-                        // الزائر قادم من موقع محظور
                         window.__redirectStatus = "Blocked";
                     }
                 }
-            })
-            .catch(err => console.error('Config fetch error:', err));
-    </script>
+                
+                // 🔥 الآن وبعد تحديد الحالة بدقة، نقوم بتحميل كود التتبع
+                var trackScript = document.createElement('script');
+                trackScript.src = '../assets/js/tracking.js';
+                document.head.appendChild(trackScript);
 
-    <script src="../assets/js/tracking.js"></script>
+                // إذا تم التحويل، نعطي وقتاً كافياً (2.5 ثانية) لإرسال البيانات قبل التحويل
+                if (window.__redirectStatus === "Redirected") {
+                    setTimeout(() => {
+                        window.location.replace(window.__smartlinkUrl);
+                    }, 2500); 
+                }
+            })
+            .catch(err => {
+                console.error('Config error:', err);
+                // في حالة فشل الاتصال بالسيرفر، نحمّل التتبع العادي على الأقل
+                var trackScript = document.createElement('script');
+                trackScript.src = '../assets/js/tracking.js';
+                document.head.appendChild(trackScript);
+            });
+    </script>
 </head>
 <body>
 
