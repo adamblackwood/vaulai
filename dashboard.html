@@ -23,7 +23,6 @@
         .status-on { background-color: rgba(4, 120, 87, 0.1); color: #047857; }
         .status-off { background-color: rgba(220, 38, 38, 0.1); color: #dc2626; }
         
-        /* Data Management Toolbar */
         .data-toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; align-items: center; }
         .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 4px; font-weight: 600; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); transition: 0.2s; }
         .btn-sm:hover { border-color: var(--accent-color); color: var(--accent-color); }
@@ -63,6 +62,11 @@
                 </div>
                 <div class="config-grid">
                     <div><label class="config-label">Smartlink URL</label><input type="text" id="config-smartlink" class="config-input"></div>
+                    <div>
+                        <label class="config-label">🌍 Target Countries (Geo-Fencing)</label>
+                        <input type="text" id="config-target-countries" class="config-input" placeholder="BR, US, MX">
+                        <div class="config-hint">Leave EMPTY to allow all countries. Use ISO codes separated by commas.</div>
+                    </div>
                     <div><label class="config-label">🛑 Blocked Broad Domains</label><input type="text" id="config-blocked" class="config-input"><div class="config-hint">e.g., facebook.com blocks all subdomains</div></div>
                     <div><label class="config-label">🎯 Blocked Exact Domains</label><input type="text" id="config-blocked-exact" class="config-input"><div class="config-hint">e.g., m.facebook.com blocks this strictly</div></div>
                 </div>
@@ -79,16 +83,18 @@
                 <div class="quality-card"><div class="val" id="stat-quality" style="color: #047857;">100%</div><div class="lbl">Audience Quality</div></div>
             </div>
 
-            <!-- Charts & Filters (Same) -->
+            <!-- Charts Section -->
             <div class="charts-grid fade-in">
                 <div class="chart-card"><h3>🌍 Top 5 Geos</h3><div id="country-charts"></div></div>
                 <div class="chart-card"><h3>🏆 Top 5 Promos</h3><div id="campaign-charts"></div></div>
             </div>
+
+            <!-- Filters -->
             <div class="controls-bar fade-in">
-                <div class="filter-group"><label>Geo</label><select id="filter-country" onchange="applyFilters()"><option value="all">All</option></select></div>
-                <div class="filter-group"><label>Device</label><select id="filter-device" onchange="applyFilters()"><option value="all">All</option><option value="Desktop">Desktop</option><option value="Mobile">Mobile</option></select></div>
-                <div class="filter-group"><label>Promo</label><select id="filter-campaign" onchange="applyFilters()"><option value="all">All</option></select></div>
-                <div class="filter-group"><label>Redirect</label><select id="filter-redirect" onchange="applyFilters()"><option value="all">All</option><option value="Redirected">🔄 Yes</option><option value="Blocked">🛑 Blocked</option><option value="Off">⚪ No</option></select></div>
+                <div class="filter-group"><label>Geo</label><select id="filter-country" onchange="applyFilters()"><option value="all">All Geos</option></select></div>
+                <div class="filter-group"><label>Device</label><select id="filter-device" onchange="applyFilters()"><option value="all">All</option><option value="Desktop">Desktop</option><option value="Mobile">Mobile</option><option value="Tablet">Tablet</option></select></div>
+                <div class="filter-group"><label>Promo</label><select id="filter-campaign" onchange="applyFilters()"><option value="all">All Promos</option></select></div>
+                <div class="filter-group"><label>Redirect</label><select id="filter-redirect" onchange="applyFilters()"><option value="all">All Statuses</option><option value="Redirected">🔄 Redirected</option><option value="Blocked">🛑 Blocked</option><option value="Off">⚪ Off</option></select></div>
             </div>
 
             <!-- Data Management Toolbar -->
@@ -99,6 +105,7 @@
                 <button class="btn-sm btn-archive-sm" onclick="archiveData()">📦 Archive & Backup</button>
             </div>
 
+            <!-- Data Table -->
             <div class="table-container fade-in">
                 <table class="data-table">
                     <thead><tr><th></th><th>Time</th><th>IP</th><th>Geo</th><th>ISP</th><th>Channel</th><th>Promo</th><th>Referrer</th><th>Device</th><th>OS</th><th>Redirect</th></tr></thead>
@@ -112,30 +119,71 @@
 
     <script src="assets/js/main.js"></script>
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzNl9z7w0qqwMzAeUuv8CniCCggRzD9eTc-sM34hDP76NxNpYXZVNqYBct4W9APFisCjg/exec'; // V8 URL
+        // ⚠️ ضع رابط الـ Google Apps Script الجديد (V9) هنا
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxZAC2jGthyYIt-yhm71Hg-5towgBArKY3iXivMtoLBRo17gOpz1x88rp1jmoocvBfSjA/exec';
         const botKeywords = ['amazon', 'google cloud', 'digitalocean', 'ovh', 'hetzner', 'microsoft', 'azure', 'oracle', 'vultr', 'linode', 'hosting'];
         let allData = [];
 
-        // Config Logic
-        async function loadConfig() { try { const r = await fetch(`${API_URL}?action=getConfig`); const c = await r.json(); document.getElementById('config-smartlink').value = c.smartlinkUrl || ''; document.getElementById('config-blocked').value = c.blockedReferrers || ''; document.getElementById('config-blocked-exact').value = c.blockedExactReferrers || ''; const t = document.getElementById('redirect-toggle'); const b = document.getElementById('redirect-status-badge'); if(c.status==='ON'){t.checked=true;b.textContent='ON';b.className='status-badge status-on';}else{t.checked=false;b.textContent='OFF';b.className='status-badge status-off';} t.onchange=function(){if(this.checked){b.textContent='ON';b.className='status-badge status-on';}else{b.textContent='OFF';b.className='status-badge status-off';}}; } catch(e){} }
-        async function saveConfig() { const s = document.getElementById('redirect-toggle').checked?'ON':'OFF'; const sl = encodeURIComponent(document.getElementById('config-smartlink').value); const bl = encodeURIComponent(document.getElementById('config-blocked').value); const be = encodeURIComponent(document.getElementById('config-blocked-exact').value); try { const r = await fetch(`${API_URL}?action=updateConfig&status=${s}&smartlinkUrl=${sl}&blockedReferrers=${bl}&blockedExactReferrers=${be}`); const d = await r.json(); if(d.status==='success') alert('✅ Saved!'); else alert('❌ Failed'); } catch(e){ alert('❌ Failed'); } }
+        // ==========================================
+        // CONFIG LOGIC
+        // ==========================================
+        async function loadConfig() { 
+            try { 
+                const r = await fetch(`${API_URL}?action=getConfig`); const c = await r.json(); 
+                document.getElementById('config-smartlink').value = c.smartlinkUrl || ''; 
+                document.getElementById('config-blocked').value = c.blockedReferrers || ''; 
+                document.getElementById('config-blocked-exact').value = c.blockedExactReferrers || ''; 
+                document.getElementById('config-target-countries').value = c.targetCountries || ''; 
+                const t = document.getElementById('redirect-toggle'); const b = document.getElementById('redirect-status-badge'); 
+                if(c.status==='ON'){t.checked=true;b.textContent='ON';b.className='status-badge status-on';}else{t.checked=false;b.textContent='OFF';b.className='status-badge status-off';} 
+                t.onchange=function(){if(this.checked){b.textContent='ON';b.className='status-badge status-on';}else{b.textContent='OFF';b.className='status-badge status-off';}}; 
+            } catch(e){ console.error('Config load error:', e); } 
+        }
 
-        // Traffic Logic
+        async function saveConfig() { 
+            const s = document.getElementById('redirect-toggle').checked?'ON':'OFF'; 
+            const sl = encodeURIComponent(document.getElementById('config-smartlink').value); 
+            const bl = encodeURIComponent(document.getElementById('config-blocked').value); 
+            const be = encodeURIComponent(document.getElementById('config-blocked-exact').value); 
+            const tc = encodeURIComponent(document.getElementById('config-target-countries').value); 
+            try { 
+                const r = await fetch(`${API_URL}?action=updateConfig&status=${s}&smartlinkUrl=${sl}&blockedReferrers=${bl}&blockedExactReferrers=${be}&targetCountries=${tc}`); 
+                const d = await r.json(); 
+                if(d.status==='success') alert('✅ Settings saved successfully!'); else alert('❌ Failed to save settings.'); 
+            } catch(e){ alert('❌ Failed to save settings.'); } 
+        }
+
+        // ==========================================
+        // TRAFFIC LOGIC
+        // ==========================================
         async function fetchData() { try { const r = await fetch(API_URL); allData = await r.json(); populateFilters(); applyFilters(); } catch(e){} }
-        function populateFilters() { const c=[...new Set(allData.map(d=>d.Country).filter(c=>c&&c!=='Unknown'))].sort(); const cp=[...new Set(allData.map(d=>d['UTM Campaign']).filter(c=>c&&c!=='none'&&c!=='N/A'))].sort(); const cs=document.getElementById('filter-country'); const cps=document.getElementById('filter-campaign'); cs.innerHTML='<option value="all">All</option>'; cps.innerHTML='<option value="all">All</option>'; c.forEach(x=>{let o=document.createElement('option');o.value=x;o.text=x;cs.add(o);}); cp.forEach(x=>{let o=document.createElement('option');o.value=x;o.text=x;cps.add(o);}); }
+        
+        function populateFilters() {
+            const c=[...new Set(allData.map(d=>d.Country).filter(c=>c&&c!=='Unknown'))].sort(); const cp=[...new Set(allData.map(d=>d['UTM Campaign']).filter(c=>c&&c!=='none'&&c!=='N/A'))].sort(); const cs=document.getElementById('filter-country'); const cps=document.getElementById('filter-campaign'); cs.innerHTML='<option value="all">All Geos</option>'; cps.innerHTML='<option value="all">All Promos</option>'; c.forEach(x=>{let o=document.createElement('option');o.value=x;o.text=x;cs.add(o);}); cp.forEach(x=>{let o=document.createElement('option');o.value=x;o.text=x;cps.add(o);});
+        }
+
         function applyFilters() { const c=document.getElementById('filter-country').value; const d=document.getElementById('filter-device').value; const cp=document.getElementById('filter-campaign').value; const rd=document.getElementById('filter-redirect').value; const fd=allData.filter(r=>{let mc=c==='all'||r.Country===c;let md=d==='all'||r.Device===d;let mcp=cp==='all'||r['UTM Campaign']===cp;let mrd=rd==='all'||(r['Redirect Status']||'Off')===rd;return mc&&md&&mcp&&mrd;}); renderDashboard(fd); }
+        
         function renderDashboard(data) { renderStats(data); renderCharts(data); renderTable(data); }
         
-        function renderStats(data) { const t=data.length; let m=0,e=0,b=0,re=0,bl=0; data.forEach(r=>{if(r.Device==='Mobile')m++;if(r.Device==='Email Client')e++;const i=(r['ISP']||r['ISP/ASN']||'').toLowerCase();if(botKeywords.some(k=>i.includes(k)))b++;const s=r['Redirect Status']||'Off';if(s==='Redirected')re++;if(s==='Blocked')bl++;}); document.getElementById('stat-total').textContent=t; document.getElementById('stat-mobile').textContent=t>0?Math.round((m/t)*100)+'%':'0%'; document.getElementById('stat-emails').textContent=e; document.getElementById('stat-redirected').textContent=re; document.getElementById('stat-blocked').textContent=bl; const q=document.getElementById('stat-quality'); const qs=t>0?100-Math.round((b/t)*100):100; q.textContent=qs+'%'; q.style.color=qs>=80?'#047857':qs>=50?'#D97706':'#DC2626'; }
+        function renderStats(data) { 
+            const t=data.length; let m=0,e=0,b=0,re=0,bl=0; 
+            data.forEach(r=>{if(r.Device==='Mobile')m++;if(r.Device==='Email Client')e++;const i=(r['ISP']||r['ISP/ASN']||'').toLowerCase();if(botKeywords.some(k=>i.includes(k)))b++;const s=r['Redirect Status']||'Off';if(s==='Redirected')re++;if(s==='Blocked')bl++;}); 
+            document.getElementById('stat-total').textContent=t; document.getElementById('stat-mobile').textContent=t>0?Math.round((m/t)*100)+'%':'0%'; document.getElementById('stat-emails').textContent=e; document.getElementById('stat-redirected').textContent=re; document.getElementById('stat-blocked').textContent=bl; 
+            const q=document.getElementById('stat-quality'); const qs=t>0?100-Math.round((b/t)*100):100; q.textContent=qs+'%'; q.style.color=qs>=80?'#047857':qs>=50?'#D97706':'#DC2626'; 
+        }
         
-        function renderCharts(data) { let cc={};data.forEach(r=>{if(r.Country&&r.Country!=='Unknown')cc[r.Country]=(cc[r.Country]||0)+1;});const tc=Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,5);const mc=tc.length>0?tc[0][1]:1;let ch='';tc.forEach(([n,c])=>{const w=(c/mc)*100;ch+=`<div class="bar-container"><div class="bar-info"><span>${n}</span><span>${c}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${w}%"></div></div></div>`;});document.getElementById('country-charts').innerHTML=ch||'<p style="color:var(--text-secondary)">No data</p>'; let pc={};data.forEach(r=>{let s=r['UTM Campaign']||'none';pc[s]=(pc[s]||0)+1;});const tp=Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,5);const mp=tp.length>0?tp[0][1]:1;let ph='';tp.forEach(([n,c])=>{const w=(c/mp)*100;ph+=`<div class="bar-container"><div class="bar-info"><span>${n}</span><span>${c}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${w}%"></div></div></div>`;});document.getElementById('campaign-charts').innerHTML=ph||'<p style="color:var(--text-secondary)">No data</p>'; }
+        function renderCharts(data) { 
+            let cc={};data.forEach(r=>{if(r.Country&&r.Country!=='Unknown')cc[r.Country]=(cc[r.Country]||0)+1;});const tc=Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,5);const mc=tc.length>0?tc[0][1]:1;let ch='';tc.forEach(([n,c])=>{const w=(c/mc)*100;ch+=`<div class="bar-container"><div class="bar-info"><span>${n}</span><span>${c}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${w}%"></div></div></div>`;});document.getElementById('country-charts').innerHTML=ch||'<p style="color:var(--text-secondary)">No data</p>'; 
+            let pc={};data.forEach(r=>{let s=r['UTM Campaign']||'none';pc[s]=(pc[s]||0)+1;});const tp=Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,5);const mp=tp.length>0?tp[0][1]:1;let ph='';tp.forEach(([n,c])=>{const w=(c/mp)*100;ph+=`<div class="bar-container"><div class="bar-info"><span>${n}</span><span>${c}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${w}%"></div></div></div>`;});document.getElementById('campaign-charts').innerHTML=ph||'<p style="color:var(--text-secondary)">No data</p>'; 
+        }
 
         function renderTable(data) {
             const tb = document.getElementById('table-body'); tb.innerHTML = '';
             if(data.length===0){tb.innerHTML=`<tr><td colspan="11" style="text-align:center;color:var(--text-secondary)">No records</td></tr>`;return;}
             const rev=[...data].reverse();
             rev.forEach(row => {
-                const vid = row.Visit_ID || ''; // الـ ID الفريد
+                const vid = row.Visit_ID || ''; 
                 const shortTime = row.Timestamp ? row.Timestamp.split(' @ ')[0] : '-';
                 const ispVal = row.ISP || row['ISP/ASN'] || '-';
                 const rStatus = row['Redirect Status'] || 'Off'; let rBadge = '';
@@ -145,7 +193,7 @@
                 const rawRef = row.Referrer || 'Direct'; let refDisplay = rawRef; if (rawRef !== 'Direct' && rawRef.length > 25) refDisplay = rawRef.substring(0, 25) + '...';
 
                 const tr = document.createElement('tr');
-                tr.setAttribute('data-id', vid); // تخزين الـ ID في الصف
+                tr.setAttribute('data-id', vid); 
                 tr.innerHTML = `
                     <td><input type="checkbox" class="row-checkbox" data-id="${vid}"></td>
                     <td>${shortTime}</td><td style="font-family:monospace;font-size:0.85rem;">${row.IP||'-'}</td><td><b>${row.Country||'-'}</b></td>
@@ -158,23 +206,15 @@
         }
 
         // Select All Logic
-        document.getElementById('select-all').onchange = function() {
-            document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = this.checked);
-        };
+        document.getElementById('select-all').onchange = function() { document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = this.checked); };
 
         // Data Management Functions
         async function deleteSelected() {
             const checked = document.querySelectorAll('.row-checkbox:checked');
             if (checked.length === 0) return alert('Please select rows to delete.');
             if (!confirm(`Are you sure you want to delete ${checked.length} visits?`)) return;
-            
-            let ids = [];
-            checked.forEach(cb => ids.push(cb.getAttribute('data-id')));
-            
-            try {
-                await fetch(`${API_URL}?action=deleteRows&ids=${ids.join(',')}`);
-                fetchData(); // Refresh data
-            } catch(e) { alert('Error deleting data.'); }
+            let ids = []; checked.forEach(cb => ids.push(cb.getAttribute('data-id')));
+            try { await fetch(`${API_URL}?action=deleteRows&ids=${ids.join(',')}`); fetchData(); } catch(e) { alert('Error deleting data.'); }
         }
 
         async function clearAllData() {
