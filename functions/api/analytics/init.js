@@ -1,6 +1,6 @@
 // functions/api/analytics/init.js
 
-const GOOGLE_SHEET_API = 'https://script.google.com/macros/s/AKfycbxZAC2jGthyYIt-yhm71Hg-5towgBArKY3iXivMtoLBRo17gOpz1x88rp1jmoocvBfSjA/exec'; // رابط V9
+const GOOGLE_SHEET_API = 'https://script.google.com/macros/s/AKfycbxI33sJG_R6_J0KGJHPZ5YBus4ctbO1Mgm9TsvSSxgdRQjfEWVhfonls8624tf_IkWO/exec'; // رابط V10
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -34,36 +34,46 @@ export async function onRequestGet(context) {
         // ✅ الشرط الأول: هل التحويل مفعل؟
         if (data.status === 'ON') {
             const visitorCountry = (request.cf?.country || 'Unknown').toUpperCase();
+            const visitorIsp = (request.cf?.asOrganization || 'Unknown').toLowerCase();
+            
             const targetCountries = (data.targetCountries || '').toUpperCase().split(',').map(c => c.trim()).filter(Boolean);
+            const blockedIsps = (data.blockedIsps || '').toLowerCase().split(',').map(i => i.trim()).filter(Boolean);
 
-            // ✅ الشرط الثاني: فحص التصفية الجغرافية (Geo-Fencing)
+            let isCountryAllowed = false;
+            let isIspBlocked = false;
+
+            // ✅ الشرط الثاني: فحص التصفية الجغرافية
             if (targetCountries.length === 0) {
-                // القائمة فارغة = السماح لجميع الدول
-                isRedirectAllowed = true;
+                isCountryAllowed = true;
             } else if (targetCountries.includes(visitorCountry)) {
-                // دولة الزائر موجودة في القائمة = مسموح
+                isCountryAllowed = true;
+            }
+
+            // ✅ الشرط الثالث: فحص حظر الـ ISP/Carrier
+            if (blockedIsps.length > 0) {
+                for (const blocked of blockedIsps) {
+                    if (visitorIsp.includes(blocked)) { // استخدام includes لمرونة الأسماء
+                        isIspBlocked = true;
+                        break;
+                    }
+                }
+            }
+
+            // القرار النهائي: مسموح إذا كانت الدولة مسموحة والـ ISP غير محظور
+            if (isCountryAllowed && !isIspBlocked) {
                 isRedirectAllowed = true;
-            } else {
-                // دولة الزائر غير موجودة = مرفوض (سيرجع Off للمتصفح)
-                isRedirectAllowed = false;
             }
         }
 
-        // ✅ إذا اجتاز الشروط، جهز الرابط المشفر وبيانات الحظر
+        // تجهيز الرد
         if (isRedirectAllowed) {
             let encodedUrl = '';
-            if (data.smartlinkUrl) {
-                try { encodedUrl = btoa(data.smartlinkUrl); } catch(e) {}
-            }
+            if (data.smartlinkUrl) { try { encodedUrl = btoa(data.smartlinkUrl); } catch(e) {} }
 
             return new Response(JSON.stringify({ 
-                s: 1, // مسموح بالتحويل
-                u: encodedUrl,
-                b: data.blockedReferrers || '',
-                e: data.blockedExactReferrers || ''
+                s: 1, u: encodedUrl, b: data.blockedReferrers || '', e: data.blockedExactReferrers || ''
             }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
         } else {
-            // مرفوض (إما التحويل مغلق، أو الدولة غير مسموح بها)
             return new Response(JSON.stringify({ s: 0, u: '', b: '', e: '' }), {
                 status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders }
             });
